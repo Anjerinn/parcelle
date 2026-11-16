@@ -1,0 +1,233 @@
+{
+ "pucerons": [
+  {
+   "file": "photos/pucerons/pucerons-3.jpg",
+   "taxon": "Aulacorthum solani",
+   "rang": "species",
+   "auteur": "(c) Alexis Tinker-Tsavalas, some rights reserved (CC BY)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/observations/49420712",
+   "lieu": "Berlin, DE-BE-BR, DE",
+   "w": 2000,
+   "h": 1500
+  }
+ ],
+ "aleurodes": [
+  {
+   "file": "photos/aleurodes/aleurodes-1.jpg",
+   "taxon": "Trialeurodes vaporariorum",
+   "rang": "species",
+   "auteur": "(c) Mike Bowie, some rights reserved (CC BY)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/observations/35973145",
+   "lieu": "Lincoln, New Zealand",
+   "w": 2000,
+   "h": 1448
+  },
+  {
+   "file": "photos/aleurodes/aleurodes-2.jpg",
+   "taxon": "Trialeurodes vaporariorum",
+   "rang": "species",
+   "auteur": "(c) carnifex, some rights reserved (CC BY)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/observations/41988965",
+   "lieu": "Castle",
+   "w": 1500,
+   "h": 2000
+  },
+  {
+   "file": "photos/aleurodes/aleurodes-3.jpg",
+   "taxon": "Bemisia tabaci",
+   "rang": "species",
+   "auteur": "(c) Mihajlo Tomić, some rights reserved (CC BY)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/observations/60075120",
+   "lieu": "Blok 8a, Beograd, Serbia",
+   "w": 1924,
+   "h": 1082
+  }
+ ],
+ "cochenilles": [
+  {
+   "file": "photos/cochenilles/cochenilles-2.jpg",
+   "taxon": "Planococcus citri",
+   "rang": "species",
+   "auteur": "(c) Rosie Steinberg, some rights reserved (CC BY)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/observations/357051520",
+   "lieu": "Wyndham St at Boundary St, Alexandria NSW 2015, Australia",
+   "w": 1506,
+   "h": 2000
+  },
+  {
+   "file": "photos/cochenilles/cochenilles-3.jpg",
+   "taxon": "Saissetia coffeae",
+   "rang": "species",
+   "auteur": "(c) Katja Schulz, some rights reserved (CC BY)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/observations/9260255",
+   "lieu": "Comunidad Valenciana, ES",
+   "w": 2000,
+   "h": 2000
+  }
+ ],
+ "thrips": [
+  {
+   "file": "photos/thrips/thrips-1.jpg",
+   "taxon": "Frankliniella occidentalis",
+   "rang": "species",
+   "auteur": "(c) Julia Palmer, some rights reserved (CC BY)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/observations/302689373",
+   "lieu": "Clarkville, New Zealand",
+   "w": 2000,
+   "h": 1333
+  },
+  {
+   "file": "photos/thrips/thrips-2.jpg",
+   "taxon": "Frankliniella occidentalis",
+   "rang": "species",
+   "auteur": "(c) Roland Gromes, some rights reserved (CC BY)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/observations/227405773",
+   "lieu": "Neuenheimer Feld, 69 Heidelberg-Handschuhsheimer Feld, Germany",
+   "w": 1025,
+   "h": 2000
+  }
+ ],
+ "sciarides": [
+  {
+   "file": "photos/sciarides/sciarides-1.jpg",
+   "taxon": "Bradysia ocellaris",
+   "rang": "species",
+   "auteur": "(c) carnifex, some rights reserved (CC BY)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/observations/9574197",
+   "lieu": "Währing",
+   "w": 1917,
+   "h": 2000
+  },
+  {
+   "file": "photos/sciarides/sciarides-2.jpg",
+   "taxon": "Bradysia tilicola",
+   "rang": "species",
+   "auteur": "(c) Svavar Martin Andreasen, some rights reserved (CC BY)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/observations/133214231",
+   "lieu": "Buhlsvej 18C, 9900 Frederikshavn, Denmark",
+   "w": 1080,
+   "h": 1920
+  },
+  {
+   "file": "photos/sciarides/sciarides-3.jpg",
+   "taxon": "Scatella stagnalis",
+   "rang": "species",
+   "auteur": "(c) Katja Schulz, some rights reserved (CC BY)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/observations/212019931",
+   "lieu": "Northwest Washington, Washington, DC, USA",
+   "w": 2000,
+   "h": 1500
+  }
+ ],
+ "tetranyques": [
+  {
+   "file": "photos/tetranyques/tetranyques-1.jpg",
+   "taxon": "Tetranychus urticae",
+   "rang": "species",
+   "auteur": "(c) Carlos Domínguez-Rodríguez, some rights reserved (CC BY)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/observations/77156328",
+   "lieu": "Villa Universidad, Morelia, Mich., México",
+   "w": 1500,
+   "h": 2000
+  },
+  {
+   "file": "photos/tetranyques/tetranyques-2.jpg",
+   "taxon": "Tetranychus urticae",
+   "rang": "species",
+   "auteur": "no rights reserved",
+   "licence": "CC0",
+   "source": "https://www.inaturalist.org/observations/266321452",
+   "lieu": "Kaohsiung, TW-KH, TW",
+   "w": 2000,
+   "h": 1500
+  }
+ ],
+ "aphidius": [
+  {
+   "file": "photos/aphidius/aphidius-1.jpg",
+   "taxon": "Aphidius colemani",
+   "rang": "species",
+   "auteur": "(c) Gianni Del Bufalo bygdb, some rights reserved (CC BY)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/observations/117041022",
+   "lieu": "Ancona AN, Italia",
+   "w": 683,
+   "h": 1024
+  }
+ ],
+ "delphastus": [
+  {
+   "file": "photos/delphastus/delphastus-1.jpg",
+   "taxon": "Delphastus catalinae",
+   "rang": "species",
+   "auteur": "(c) Mark Richman, some rights reserved (CC BY)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/observations/318859798",
+   "lieu": "Lanzarote, Yaiza, Palmas, ES",
+   "w": 1500,
+   "h": 2000
+  },
+  {
+   "file": "photos/delphastus/delphastus-2.jpg",
+   "taxon": "Delphastus catalinae",
+   "rang": "species",
+   "auteur": "(c) Alessandro Franchini, some rights reserved (CC BY)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/observations/215054429",
+   "lieu": "Kealakekua, HI, USA",
+   "w": 1500,
+   "h": 2000
+  }
+ ],
+ "orius": [
+  {
+   "file": "photos/orius/orius-2.jpg",
+   "taxon": "Orius insidiosus",
+   "rang": "species",
+   "auteur": "(c) Zeke Blankenship, some rights reserved (CC BY)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/observations/307399075",
+   "lieu": "E Stanton Ave, Columbus, OH, US",
+   "w": 857,
+   "h": 1853
+  }
+ ],
+ "blanc": [
+  {
+   "file": "photos/blanc/blanc-2.jpg",
+   "taxon": "Podosphaera xanthii",
+   "rang": "species",
+   "auteur": "(c) Jon Sullivan, some rights reserved (CC BY)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/observations/359769884",
+   "lieu": "Christchurch including Banks Peninsula, Canterbury, New Zealand",
+   "w": 2000,
+   "h": 1333
+  }
+ ],
+ "botrytis": [
+  {
+   "file": "photos/botrytis/botrytis-2.jpg",
+   "taxon": "Botrytis cinerea",
+   "rang": "species",
+   "auteur": "(c) Vasco Henrique Oliveira Fonseca, some rights reserved (CC BY)",
+   "licence": "CC BY",
+   "source": "https://www.inaturalist.org/observations/264556815",
+   "lieu": "2925-604 São Lourenço, Portugal",
+   "w": 1500,
+   "h": 2000
+  }
+ ]
+}

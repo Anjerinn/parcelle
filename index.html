@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Parcelle</title>
+<meta name="theme-color" content="#00241B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Parcelle">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+:root{
+  color-scheme:light;
+  --ground:#F1F7F3; --surface:#FFFFFF; --surface-2:#E3F1EA; --ink:#00241B; --muted:#4B665E;
+  --line:#CBDDD4; --line-strong:#9DB8AC; --accent:#2F6A70; --accent-ink:#FFFFFF; --soft:#D5F5E6;
+  --good:#2C7A54; --warn:#8A5A00; --warn-soft:#FBEBC8; --alert:#A8382A; --alert-soft:#F6DDD8; --ia:#5B3FA0; --ia-soft:#E9E1F8;
+  --bar:#00241B; --bar-ink:#B5FFE1;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{ color-scheme:dark;
+    --ground:#00140F; --surface:#01261D; --surface-2:#06352A; --ink:#E2F6EC; --muted:#9DBDB0;
+    --line:#134537; --line-strong:#2B6652; --accent:#93E5AB; --accent-ink:#00241B; --soft:#0B3F31;
+    --good:#93E5AB; --warn:#F0C36A; --warn-soft:#3D3010; --alert:#F08A7A; --alert-soft:#4A1F18; --ia:#C3B0F5; --ia-soft:#2B2150;
+    --bar:#000D0A; --bar-ink:#B5FFE1; }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.4;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+i.lat{font-style:italic}
+header.top{position:sticky;top:0;z-index:20;background:var(--bar);color:var(--bar-ink);padding:calc(env(safe-area-inset-top,0px) + 8px) max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:8px;min-height:52px}
+header.top h1{font-size:18px;font-weight:700;margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
+header.top .hb{background:transparent;border:0;color:var(--bar-ink);min-width:44px;min-height:44px;font-size:17px;padding:0 6px;border-radius:8px}
+#saveState{font-size:11px;opacity:.85;text-align:right;line-height:1.2;max-width:120px}
+#saveState.bad{background:var(--alert);color:#fff;padding:4px 8px;border-radius:6px;opacity:1;font-weight:700}
+main{max-width:760px;margin:0 auto;padding:12px max(12px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 150px) max(12px,env(safe-area-inset-left,0px))}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line-strong);display:flex;padding-bottom:env(safe-area-inset-bottom,0px)}
+nav.tabs button{flex:1;border:0;background:transparent;min-height:54px;font-size:12px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button.on{color:var(--accent)}
+.fab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 70px);z-index:21;width:60px;height:60px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);font-size:32px;line-height:1;box-shadow:0 6px 18px rgba(0,36,27,.35)}
+h2{font-size:13px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:22px 0 8px;font-weight:700}
+h2:first-child{margin-top:4px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.card h3{margin:0 0 2px;font-size:17px;font-weight:700}
+.card .sub{color:var(--muted);font-size:14px}
+.rowline{display:flex;align-items:center;gap:10px}
+.rowline .grow{flex:1;min-width:0}
+.btn{border:1px solid var(--line-strong);background:var(--surface);border-radius:10px;min-height:44px;padding:8px 14px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px;text-align:center}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.big{min-height:56px;font-size:18px;width:100%}
+.btn.block{width:100%}
+.btn.danger{color:var(--alert);border-color:var(--alert)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.45}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.btns .btn{flex:1 1 140px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--line-strong);border-radius:10px;overflow:hidden;margin-top:8px}
+.seg button{border:0;border-right:1px solid var(--line-strong);background:var(--surface);min-height:44px;font-size:14px;font-weight:600;color:var(--muted);padding:4px}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--ink);color:var(--ground)}
+.seg button.on.none{background:var(--good);color:#fff}
+.seg button.on.obs{background:var(--accent);color:var(--accent-ink)}
+.rate{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.rate button{border:1px solid var(--line-strong);background:var(--surface);border-radius:8px;min-height:44px;font-weight:700;font-family:var(--mono)}
+.rate button.on{background:var(--ink);color:var(--ground);border-color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{border:1px solid var(--line-strong);background:var(--surface);border-radius:99px;min-height:40px;padding:6px 14px;font-size:15px;font-weight:600}
+.chips button.on{background:var(--ink);color:var(--ground);border-color:var(--ink)}
+.obsrow{display:block;width:100%;text-align:left;border:1px solid var(--line);border-left:5px solid var(--line-strong);background:var(--ground);border-radius:8px;padding:8px 10px;margin-top:8px;min-height:44px}
+.obsrow.pest{border-left-color:#B2412E}.obsrow.aux{border-left-color:#2F7A4A}.obsrow.dis{border-left-color:#7A5AB8}.obsrow.weed{border-left-color:#C08A2A}.obsrow.abio{border-left-color:#5F6B60}
+.obsrow b{font-weight:700}
+.obsrow .m{display:block;color:var(--muted);font-size:14px}
+.tag{display:inline-block;font-size:12px;font-weight:700;border-radius:99px;padding:1px 8px;border:1px solid var(--line-strong);color:var(--muted);vertical-align:middle;white-space:nowrap}
+.tag.ia{background:var(--ia-soft);color:var(--ia);border-color:var(--ia)}
+.tag.todo{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+.tag.ok{background:var(--soft);color:var(--good);border-color:var(--good)}
+.banner{border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:15px;background:var(--warn-soft);color:var(--ink);border:1px solid var(--warn)}
+.banner.alert{background:var(--alert-soft);border-color:var(--alert)}
+.banner.ia{background:var(--ia-soft);border-color:var(--ia)}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px;min-width:0}
+.field>label,.lbl{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.field input,.field select,.field textarea{border:1px solid var(--line-strong);border-radius:8px;padding:10px;background:var(--surface);width:100%;min-height:44px;font-size:16px;min-width:0}
+.field textarea{min-height:76px;resize:vertical}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.step{display:grid;grid-template-columns:48px 1fr 48px;gap:6px}
+.step button{border:1px solid var(--line-strong);background:var(--surface);border-radius:8px;min-height:44px;font-size:22px;font-weight:700}
+.step input{text-align:center;font-family:var(--mono)}
+.check{display:flex;align-items:center;gap:10px;min-height:44px;font-weight:600}
+.check input{width:24px;height:24px;flex:none}
+.muted{color:var(--muted);font-size:14px}
+.thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.thumbs .ph{position:relative;width:76px;height:76px;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:var(--surface-2)}
+.thumbs img{width:100%;height:100%;object-fit:cover;display:block}
+.thumbs .ph button{position:absolute;top:0;right:0;width:28px;height:28px;border:0;background:rgba(0,0,0,.6);color:#fff;border-radius:0 0 0 8px;font-size:16px;line-height:1}
+#sheet{position:fixed;inset:0;z-index:40;background:rgba(0,20,15,.55);display:flex;align-items:flex-end;justify-content:center}
+#sheet .box{background:var(--ground);width:100%;max-width:760px;max-height:92dvh;border-radius:16px 16px 0 0;display:flex;flex-direction:column}
+#sheet .sh{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+#sheet .sh h3{flex:1;margin:0;font-size:17px}
+#sheet .sb{overflow:auto;padding:12px;-webkit-overflow-scrolling:touch}
+#sheet .sf{padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 10px);border-top:1px solid var(--line);display:flex;gap:8px;background:var(--surface)}
+#sheet .sf .btn{flex:1}
+.menu button{display:flex;width:100%;align-items:center;gap:12px;min-height:56px;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 14px;margin-bottom:8px;font-size:17px;font-weight:600;text-align:left}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 140px);transform:translateX(-50%);background:var(--ink);color:var(--ground);padding:10px 16px;border-radius:10px;z-index:60;max-width:90vw;text-align:center;font-weight:600}
+#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:70;display:flex;align-items:center;justify-content:center}
+#lightbox img{max-width:100vw;max-height:100dvh}
+.cand{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:var(--surface)}
+.cand .rk{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.cand h3{margin:2px 0;font-size:18px}
+.cand ul{margin:4px 0 8px;padding-left:20px}
+.cand .k{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+.cand .k.pour{color:var(--good)}.cand .k.contre{color:var(--alert)}.cand .k.verif{color:var(--accent)}
+#show{position:fixed;inset:0;z-index:50;background:var(--ground);overflow:auto;padding:calc(env(safe-area-inset-top,0px) + 12px) 14px calc(env(safe-area-inset-bottom,0px) + 20px)}
+#show .cols{display:grid;grid-template-columns:1fr;gap:14px;max-width:1300px;margin:0 auto}
+@media (min-width:900px){ #show .cols{grid-template-columns:1fr 1.2fr 1fr} }
+#show img{width:100%;border-radius:10px;margin-bottom:8px}
+.refs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:10px 0}
+.refs figure{margin:0}
+.refs img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block;background:var(--surface-2);cursor:zoom-in}
+.refs figcaption{font-size:11px;color:var(--muted);line-height:1.3;margin-top:3px;overflow-wrap:anywhere}
+ul.src{font-size:13px;color:var(--muted);padding-left:18px}
+#print{display:none}
+@media print{
+  body{background:#fff;color:#000}
+  header.top,nav.tabs,.fab,main,#sheet,#toast,#show{display:none!important}
+  #print{display:block;font-family:Arial,Helvetica,sans-serif;font-size:10.5pt;color:#000}
+  #print .copy{page-break-after:always}
+  #print .copy:last-child{page-break-after:auto}
+  #print h1{font-size:14pt;margin:0 0 6pt}
+  #print h2{font-size:11pt;margin:12pt 0 4pt;color:#000;letter-spacing:0;text-transform:none}
+  #print table{width:100%;border-collapse:collapse}
+  #print th,#print td{border:1px solid #000;padding:3pt 5pt;text-align:left;vertical-align:top}
+  #print th{background:#eee;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  #print .hd{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #000}
+  #print .hd div{padding:4pt 6pt;border-right:1px solid #000}
+  #print .hd div:last-child{border-right:0}
+  #print .foot{margin-top:8pt;font-size:8.5pt}
+  @page{margin:14mm}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <button class="hb" id="btnBack" data-act="back" hidden aria-label="Retour">‹ Retour</button>
+  <h1 id="title">Parcelle</h1>
+  <div id="saveState"></div>
+</header>
+<main id="main"></main>
+<button class="fab" id="fab" data-act="plus" aria-label="Ajouter">+</button>
+<nav class="tabs" id="tabs">
+  <button data-act="tab" data-v="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Tournée</button>
+  <button data-act="tab" data-v="guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM9 8h6M9 12h6"/></svg>Guide</button>
+  <button data-act="tab" data-v="cas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>Diagnostics</button>
+  <button data-act="tab" data-v="reglages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Réglages</button>
+</nav>
+<div id="print"></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   Parcelle v3 — carnet de dépistage (serre et jardin) + guide hors ligne.
+   Tout reste sur l'appareil (IndexedDB). Aucun serveur, aucune clé, aucun compte.
+   Application construite avec Claude (Anthropic) pour Sawaka — cours 153-1U4-JO.
+   ===================================================================== */
+const VERSION = "3.1.0";
+
+/* ---------- listes ---------- */
+const CAT = {pest:"Ravageur", aux:"Auxiliaire", dis:"Maladie", weed:"Adventice", abio:"Désordre abiotique", unk:"Inconnu"};
+const ORGANISMS = {
+  pest:["Pucerons","Aleurodes","Cochenilles","Thrips","Sciarides / Mouches du rivage","Tétranyques / Tarsonèmes","Punaises","Cicadelles","Altises","Scarabées et Hannetons","Doryphores","Charançons","Chrysomèles","Taupin / Vers fil-de-fer","Tordeuses","Pyrales","Mineuses (papillons)","Mineuses (mouches)","Teignes","Piérides / Fausse arpenteuse","Perceur","Mouches / Drosophiles","Limaces et escargots"],
+  aux:["Guêpes parasitoïdes","Aphidius colemani","Encarsia formosa","Acariens prédateurs","Amblyseius cucumeris","Neoseiulus californicus","Hypoaspis","Coccinelles","Cryptolaemus montrouzieri","Delphastus","Cécidomyies / Syrphes","Feltiella acarisuga","Punaises prédatrices","Orius insidiosus","Chrysopes","Steinernema feltiae","Abeilles","Mouches prédatrices / Syrphes"],
+  dis:["Blanc (oïdium)","Moisissure grise (Botrytis)","Pythium / fonte des semis","Fumagine (Cladosporium spp.)","Mildiou","Alternariose (tache alternarienne)","Septoriose (tache septorienne)","Anthracnose","Rouille","Cladosporiose","Pourriture blanche (sclérotiniose)","Flétrissure fusarienne","Verticilliose","Cercosporose","Hernie des crucifères","Flétrissement bactérien","Tache bactérienne","Moucheture bactérienne","Pourriture molle","Nervation noire des crucifères","Galle du collet","Mosaïque du concombre (CMV)","Mosaïque de la tomate (ToMV)","Virus Y de la pomme de terre","Jaunisse de l'aster","Nématode à galles","Nématode des lésions"],
+  weed:["Oxalide d'Europe","Achillée millefeuille","Amarante à racine rouge","Asclépiade de Syrie","Bourse à pasteur","Carotte sauvage","Chardon des champs","Chardon vulgaire","Chénopode blanc","Chiendent","Digitaire astringente","Fléole des prés","Laiteron potager","Marguerite blanche","Matricaire odorante","Moutarde des champs","Panic capillaire","Petite herbe à poux","Pissenlit","Plantain majeur","Pourpier potager","Prêle des champs","Renouée liseron","Renouée persicaire","Sétaire glauque","Souchet comestible","Stellaire moyenne","Tabouret des champs","Trèfle blanc","Trèfle rouge","Tussilage pas d'âne","Verge d'or du Canada","Vesce jargeau"],
+  abio:["Œdème (intumescences)","Brûlure / coup de soleil","Stress hydrique","Carence","Phytotoxicité","Dégât d'eau (gouttes sur feuilles)","Nécrose apicale (cul noir)","Éclatement des fruits","Dommage de gel","Compaction du sol"],
+  unk:[]
+};
+const STAGES = ["œuf","larve","nymphe / pupe","adulte","ailé","aptère","mobile","fixé","plantule","végétatif","en fleur","en graines"];
+const PARTS = {leaf:"Feuilles", stem:"Tige / pétiole", flower:"Fleurs", fruit:"Fruits", root:"Racines / collet", whole:"Plant entier", soil:"Sol / surface"};
+const METHODS = ["visuel","feuille blanche","souffle dans les fleurs","loupe","piège"];
+const CONFIRM = ["moi","guide","prof","piste IA"];
+const TRAP_TYPES = {sticky_yellow:"Piège collant jaune", sticky_blue:"Piège collant bleu (thrips)", potato_larvae:"Pomme de terre — larves de sciarides / mouches du rivage", potato:"Pomme de terre coupée enfouie (vers fil-de-fer)", wasp_cup:"Piège-gobelet (guêpes)", beer_box:"Boîte à fentes avec bière (limaces)", jb_trap:"Piège à scarabée japonais", other:"Autre"};
+const OLD_STAGE = {seedling:"plantule", vegetative:"végétatif", flowering:"en fleur", fruiting:"fructification", mature:"mature"};
+const DEFAULT_ANCHORS = "0 absent · 1–2 traces · 3–4 faible · 5–6 modéré · 7–8 élevé · 9 sévère · 10 plant à jeter";
+const DIAG_TYPES = ["insecte","acarien","champignon","oomycète","bactérie","virus","nématode","abiotique","adventice"];
+const TYPE_CAT = {insecte:"pest", acarien:"pest", "nématode":"dis", champignon:"dis", "oomycète":"dis", "bactérie":"dis", virus:"dis", abiotique:"abio", adventice:"weed"};
+const PHOTO_SLOTS = ["Plant entier","Gros plan du symptôme","Dessous de la feuille","Vue à la loupe"];
+
+/* ---------- petits outils ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const pad = n => String(n).padStart(2, "0");
+const iso = d => d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate());
+const today = () => iso(new Date());
+const nowHM = () => { const d = new Date(); return pad(d.getHours()) + ":" + pad(d.getMinutes()); };
+const norm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/œ/g, "oe").trim();
+function isoWeek(ds){ const d = new Date(ds + "T12:00:00"); const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); const dn = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - dn); const y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1)); return Math.ceil(((t - y0) / 86400000 + 1) / 7); }
+const weekLabel = ds => ds ? "S" + pad(isoWeek(ds)) : "";
+function frDate(ds){ if(!ds) return ""; try{ return new Date(ds + "T12:00:00").toLocaleDateString("fr-CA", {day:"numeric", month:"short", year:"numeric"}); }catch(e){ return ds; } }
+const num = v => (v === "" || v === null || v === undefined || isNaN(Number(v))) ? "" : Number(v);
+function toast(msg, ms=2600){ let t = $("#toast"); if(t) t.remove(); t = document.createElement("div"); t.id = "toast"; t.textContent = msg; document.body.append(t); setTimeout(() => t.remove(), ms); }
+const coarse = () => window.matchMedia && matchMedia("(pointer:coarse)").matches;
+
+/* ---------- stockage : IndexedDB ---------- */
+const COLLS = ["gardens","parcels","traps","rounds","checks","obs","inbox","diags","settings","notes"];
+const S = { all:{}, gid:null, view:{name:"home"}, stack:[], guide:null, meta:{} };
+for(const c of COLLS) S.all[c] = {};
+let _db;
+function odb(){ return _db || (_db = new Promise((res, rej) => { let r; try{ r = indexedDB.open("parcelle-v3", 1); }catch(e){ return rej(e); }
+  r.onupgradeneeded = () => { const d = r.result; d.createObjectStore("docs", {keyPath:"k"}); d.createObjectStore("photos"); d.createObjectStore("thumbs"); d.createObjectStore("meta"); };
+  r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); r.onblocked = () => rej(new Error("base de données bloquée")); })); }
+async function idb(store, mode, fn){ const d = await odb(); return new Promise((res, rej) => { const t = d.transaction(store, mode); const q = fn(t.objectStore(store)); t.oncomplete = () => res(q ? q.result : undefined); t.onerror = t.onabort = () => rej(t.error || new Error("échec IndexedDB")); }); }
+function saveState(ok, err){ const el = $("#saveState"); if(!el) return; if(ok){ el.className = ""; el.textContent = "Enregistré sur cet appareil"; } else { el.className = "bad"; el.textContent = "NON ENREGISTRÉ"; console.error(err); toast("Échec d'enregistrement : " + (err && err.message || err) + ". Exportez le journal maintenant.", 8000); } }
+async function put(coll, id, doc, keepStamp){ if(!keepStamp) doc.updatedAt = Date.now(); S.all[coll][id] = doc;
+  try{ await idb("docs", "readwrite", s => s.put({k:coll + "/" + id, c:coll, id, d:doc})); saveState(true); return true; }catch(e){ saveState(false, e); return false; } }
+const del = (coll, id) => put(coll, id, {_deleted:true});      /* pierre tombale : une fusion ne ressuscite pas l'élément */
+const live = coll => Object.entries(S.all[coll]).filter(([, d]) => d && !d._deleted);
+const get = (coll, id) => { const d = S.all[coll][id]; return d && !d._deleted ? d : null; };
+async function metaGet(k){ try{ return await idb("meta", "readonly", s => s.get(k)); }catch(e){ return undefined; } }
+async function metaSet(k, v){ S.meta[k] = v; try{ await idb("meta", "readwrite", s => s.put(v, k)); }catch(e){ saveState(false, e); } }
+async function photoPut(id, rec){ const {thumb, ...full} = rec; try{ await idb("photos", "readwrite", s => s.put(full, id)); if(thumb) await idb("thumbs", "readwrite", s => s.put({data:thumb}, id)); return true; }catch(e){ saveState(false, e); return false; } }
+const photoGet = id => idb("photos", "readonly", s => s.get(id)).catch(() => null);
+const thumbGet = async id => { const t = await idb("thumbs", "readonly", s => s.get(id)).catch(() => null); if(t) return t.data; const p = await photoGet(id); return p ? p.data : null; };
+async function allPhotos(){ const out = {}; const d = await odb();
+  await new Promise(res => { const q = d.transaction("photos", "readonly").objectStore("photos").openCursor(); q.onsuccess = () => { const c = q.result; if(!c) return res(); out[c.key] = c.value; c.continue(); }; q.onerror = () => res(); });
+  await new Promise(res => { const q = d.transaction("thumbs", "readonly").objectStore("thumbs").openCursor(); q.onsuccess = () => { const c = q.result; if(!c) return res(); if(out[c.key]) out[c.key] = {...out[c.key], thumb:c.value.data}; c.continue(); }; q.onerror = () => res(); });
+  return out; }
+async function loadAll(){ const rows = await idb("docs", "readonly", s => s.getAll()); for(const r of rows){ if(S.all[r.c]) S.all[r.c][r.id] = r.d; }
+  for(const k of ["lastBackup","migratedV1","gid","diagCount"]) S.meta[k] = await metaGet(k); }
+
+/* ---------- fusion (migration, import du journal) ----------
+   Règle : jamais d'écrasement à l'aveugle. Un élément est ajouté s'il manque, remplacé seulement si la copie
+   importée est plus récente (updatedAt), sinon laissé tel quel. Les photos sont ajoutées si absentes. */
+async function mergeData(d){
+  const st = {added:0, updated:0, same:0, photos:0};
+  const isLog = d.kind === "fieldlog";                       /* journal de la v1 : jardins/parcelles/pièges réduits à un nom */
+  for(const c of COLLS){ for(const [id, doc0] of Object.entries(d[c] || {})){
+    if(!doc0 || typeof doc0 !== "object") continue;
+    const doc = {...doc0}; if(isLog && (c === "gardens" || c === "parcels" || c === "traps")) doc._stub = true;
+    const cur = S.all[c][id];
+    if(!cur){ await put(c, id, doc, true); st.added++; }
+    else if((cur._stub && !doc._stub) || (doc.updatedAt || 0) > (cur.updatedAt || 0)){ await put(c, id, doc, true); st.updated++; }
+    else st.same++;
+  } }
+  for(const [id, ph] of Object.entries(d.photos || {})){ if(!ph || !ph.data) continue; const has = await photoGet(id); if(!has){ if(await photoPut(id, ph)) st.photos++; } }
+  return st;
+}
+async function migrateV1(){
+  if(S.meta.migratedV1) return;
+  let raw = null; try{ raw = localStorage.getItem("gp_data_v1"); }catch(e){}
+  if(!raw){ return; }                                         /* rien à migrer sur ce site ; on ne marque rien pour pouvoir réessayer */
+  let d = null; try{ d = JSON.parse(raw); }catch(e){ return; }
+  const st = await mergeData(d);
+  /* photos de la v1 rangées dans l'ancienne base « parcelle-photos » */
+  try{ const old = await new Promise(res => { const r = indexedDB.open("parcelle-photos"); r.onsuccess = () => res(r.result); r.onerror = () => res(null); r.onupgradeneeded = () => { try{ r.transaction.abort(); }catch(e){} res(null); }; });
+    if(old && old.objectStoreNames.contains("photos")){ const ph = await new Promise(res => { const o = {}; const q = old.transaction("photos", "readonly").objectStore("photos").openCursor(); q.onsuccess = () => { const c = q.result; if(!c) return res(o); o[c.key] = c.value; c.continue(); }; q.onerror = () => res(o); });
+      for(const [id, rec] of Object.entries(ph)){ if(rec && rec.data && !(await photoGet(id))){ await photoPut(id, rec); st.photos++; } } old.close(); } }catch(e){}
+  await metaSet("migratedV1", {at:Date.now(), ...st});        /* la clé gp_data_v1 n'est PAS effacée : elle sert de copie de secours */
+  toast("Anciennes données reprises : " + st.added + " éléments.");
+}
+
+/* ---------- modèle ---------- */
+function gardenList(){ return live("gardens").sort((a, b) => (a[1].order ?? 0) - (b[1].order ?? 0) || (a[1].createdAt || 0) - (b[1].createdAt || 0)); }
+const defaultGid = () => { const g = gardenList(); return g.length ? g[0][0] : null; };
+const gardenOf = doc => (doc.gardenId && get("gardens", doc.gardenId)) ? doc.gardenId : defaultGid();
+const curGarden = () => S.gid ? get("gardens", S.gid) : null;
+const isSerre = g => g && g.kind === "serre";
+const inG = coll => live(coll).filter(([, d]) => gardenOf(d) === S.gid);
+const parcelName = p => p ? (p.name || p.crop || "Sans nom") : "";
+const parcelsG = () => inG("parcels").sort((a, b) => (a[1].createdAt || 0) - (b[1].createdAt || 0));
+const trapsG = () => inG("traps").sort((a, b) => (a[1].createdAt || 0) - (b[1].createdAt || 0));
+const roundsG = () => inG("rounds").sort((a, b) => (b[1].date || "").localeCompare(a[1].date || ""));
+const obsOfRound = (rid, pid) => live("obs").filter(([, o]) => o.roundId === rid && (pid === undefined || (o.parcelId || "") === pid)).sort((a, b) => (a[1].createdAt || 0) - (b[1].createdAt || 0));
+const checkOf = (rid, tid) => live("checks").find(([, c]) => c.roundId === rid && c.trapId === tid);
+const settings = () => get("settings", "main") || {};
+const anchors = () => settings().anchors || DEFAULT_ANCHORS;
+/* statut à trois états d'un groupe de plantes dans une tournée : "obs" | "none" (dépisté, rien vu) | "" (non dépisté) */
+function statusOf(round, rid, pid){ if(obsOfRound(rid, pid).length) return "obs"; return (round.status || {})[pid] === "none" ? "none" : ""; }
+const STATUS_LABEL = {obs:"dépisté, observation(s)", none:"dépisté, rien vu", "":"non dépisté"};
+function trapLabel(tr){ return (tr.label ? tr.label + " — " : "") + (TRAP_TYPES[tr.type] || tr.type || "Piège"); }
+/* cumul d'une espèce sur un piège depuis le dernier remplacement de la carte (les captures du jour du remplacement comptent dans l'ancienne carte) */
+function cumul(tid, date, species){ const cs = live("checks").filter(([, c]) => c.trapId === tid && (c.date || "") <= date).sort((a, b) => (a[1].date || "").localeCompare(b[1].date || "")); let tot = 0;
+  for(const [, c] of cs){ for(const r of (c.counts || [])){ if(norm(r.species) === norm(species)) tot += Number(r.n) || 0; } if(c.replaced && c.date < date) tot = 0; }
+  return tot; }
+function rowSummary(r){ const bits = []; if(r.stage) bits.push(r.stage); if(r.n !== "" && r.n != null) bits.push("nombre " + r.n); if(r.rating !== "" && r.rating != null) bits.push("éval. " + r.rating + "/10"); if(r.sev) bits.push("ancienne échelle 1–5 : " + r.sev);
+  if(r.touched !== "" && r.touched != null || r.examined !== "" && r.examined != null) bits.push((r.touched ?? "?") + "/" + (r.examined ?? "?") + " plants"); if(r.part && PARTS[r.part]) bits.push(PARTS[r.part]); if(r.method) bits.push(r.method); return bits.join(" · "); }
+function allOrganismNames(cat){ const base = cat && ORGANISMS[cat] ? ORGANISMS[cat] : Object.values(ORGANISMS).flat(); const g = (S.guide ? S.guide.entries : []).filter(e => !cat || e.cat === cat).flatMap(e => [e.nom, e.latin].filter(Boolean)); return [...new Set([...base, ...g])]; }
+function catOfName(name){ const n = norm(name); for(const [c, l] of Object.entries(ORGANISMS)){ if(l.some(x => norm(x) === n)) return c; } const e = (S.guide ? S.guide.entries : []).find(e => norm(e.nom) === n || norm(e.latin) === n); return e ? e.cat : ""; }
+
+/* ---------- navigation ---------- */
+function go(view){ S.stack.push(S.view); S.view = view; render(); window.scrollTo(0, 0); }
+function back(){ S.view = S.stack.pop() || {name:"home"}; render(); }
+function tab(name){ S.stack = []; S.view = {name}; render(); window.scrollTo(0, 0); }
+function render(){
+  const v = S.view; const top = ["home","guide","cas","reglages"].includes(v.name);
+  $("#btnBack").hidden = top; $("#tabs").hidden = false;
+  $$("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.v === (top ? v.name : (S.stack[0] || {}).name)));
+  $("#fab").hidden = !(v.name === "home" || v.name === "round");
+  const fn = VIEWS[v.name] || VIEWS.home; const out = fn(v);
+  $("#title").textContent = out.title; $("#main").innerHTML = out.html; hydrateThumbs($("#main"));
+}
+async function hydrateThumbs(root){ for(const img of $$("img[data-thumb]", root)){ const id = img.dataset.thumb; img.removeAttribute("data-thumb"); const src = await thumbGet(id); if(src) img.src = src; else img.alt = "photo absente"; } }
+const fld = (label, inner, cls) => `<div class="field ${cls || ""}"><label>${label}</label>${inner}</div>`;
+const opt = (list, val, blank) => (blank !== undefined ? `<option value="">${esc(blank)}</option>` : "") + (Array.isArray(list) ? list.map(x => [x, x]) : Object.entries(list)).map(([k, v]) => `<option value="${esc(k)}"${k === val ? " selected" : ""}>${esc(v)}</option>`).join("");
+const thumbsHTML = (ids, rm) => ids && ids.length ? `<div class="thumbs">${ids.map(id => `<div class="ph"><img data-thumb="${esc(id)}" data-act="zoom" data-id="${esc(id)}" alt="">${rm ? `<button data-act="${rm}" data-id="${esc(id)}" aria-label="Retirer">×</button>` : ""}</div>`).join("")}</div>` : "";
+
+/* ---------- vues ---------- */
+const VIEWS = {};
+VIEWS.home = () => {
+  const gl = gardenList(); const g = curGarden();
+  let h = "";
+  const days = S.meta.lastBackup ? Math.floor((Date.now() - S.meta.lastBackup) / 86400000) : null;
+  const hasData = live("obs").length + live("rounds").length + live("checks").length > 0;
+  if(hasData && (days === null || days >= 7)) h += `<div class="banner">Dernière sauvegarde : ${days === null ? "jamais" : "il y a " + days + " jours"}. <button class="btn ghost" data-act="tab" data-v="reglages">Exporter le journal</button></div>`;
+  h += `<div class="chips" style="margin-bottom:12px">${gl.map(([id, x]) => `<button data-act="garden" data-id="${id}" class="${id === S.gid ? "on" : ""}">${esc(x.name || "Sans nom")}</button>`).join("")}<button data-act="newGarden">+ Lieu</button></div>`;
+  if(!g){ h += `<div class="card"><h3>Bienvenue dans Parcelle</h3><p class="sub">Créez un lieu (serre ou jardin), ou importez un journal existant dans Réglages.</p><div class="btns"><button class="btn primary" data-act="newGarden">Créer un lieu</button><button class="btn" data-act="tab" data-v="reglages">Importer un journal</button></div></div>`; return {title:"Parcelle", html:h}; }
+  const serre = isSerre(g);
+  h += `<div class="card"><div class="rowline"><div class="grow"><h3>${esc(g.name)}</h3><div class="sub">${serre ? "Serre" + (g.section ? " · section " + esc(g.section) : "") + (g.partners ? " · " + esc(g.partners) : "") : "Jardin" + (g.zone ? " · zone " + esc(g.zone) : "")}</div></div><button class="btn" data-act="editGarden">Modifier</button></div></div>`;
+  const rs = roundsG();
+  if(serre || rs.length){
+    const td = rs.find(([, r]) => r.date === today());
+    h += `<button class="btn primary big" data-act="startRound">${td ? "Continuer la tournée d'aujourd'hui" : "Commencer la tournée"}</button><div class="btns"><button class="btn" data-act="pastRound">Tournée à une autre date</button><button class="btn" data-act="diagNew">Diagnostiquer une photo</button></div>`;
+    h += `<h2>Tournées</h2>`;
+    if(!rs.length) h += `<p class="muted">Aucune tournée pour l'instant.</p>`;
+    for(const [rid, r] of rs){ const ps = parcelsG(); const done = ps.filter(([pid]) => statusOf(r, rid, pid)).length; const no = obsOfRound(rid).length;
+      h += `<button class="obsrow" data-act="openRound" data-id="${rid}"><b>${esc(r.week || weekLabel(r.date))} · ${esc(frDate(r.date))}</b><span class="m">${r.noScout ? "Pas de dépistage" + (r.noScoutReason ? " (" + esc(r.noScoutReason) + ")" : "") : done + "/" + ps.length + " groupes dépistés · " + no + " observation" + (no > 1 ? "s" : "")}</span></button>`; }
+  }
+  h += `<h2>${serre ? "Groupes de plantes" : "Parcelles"}</h2>`;
+  const ps = parcelsG(); if(!ps.length) h += `<p class="muted">Aucun groupe. Utilisez le bouton + pour en ajouter.</p>`;
+  for(const [pid, p] of ps){ h += `<button class="obsrow" data-act="editParcel" data-id="${pid}"><b>${esc(parcelName(p))}</b>${p.latin ? ` <i class="lat">${esc(p.latin)}</i>` : ""}<span class="m">${[p.nPlants ? p.nPlants + " plants" : "", p.position, !serre && p.crop && p.crop !== p.name ? p.crop : "", p.stage ? (OLD_STAGE[p.stage] || p.stage) : "", p._stub ? "repris d'un journal v1 (nom seulement)" : ""].filter(Boolean).map(esc).join(" · ") || "&nbsp;"}</span></button>`; }
+  h += `<h2>Pièges</h2>`;
+  const ts = trapsG(); if(!ts.length) h += `<p class="muted">Aucun piège.</p>`;
+  for(const [tid, tr] of ts){ const host = get("parcels", tr.parcelId); const nc = live("checks").filter(([, c]) => c.trapId === tid).length;
+    h += `<button class="obsrow" data-act="editTrap" data-id="${tid}"><b>${esc(trapLabel(tr))}</b><span class="m">${[host ? parcelName(host) : "", tr.dateSet ? "posé le " + frDate(tr.dateSet) : "", tr.height ? tr.height + " cm" : "", tr.target, nc + " relevé" + (nc > 1 ? "s" : ""), tr.active === false ? "retiré" : ""].filter(Boolean).map(esc).join(" · ")}</span></button>`; }
+  /* observations et relevés hors tournée (données de jardin de la v1) */
+  const loose = inG("obs").filter(([, o]) => !o.roundId).sort((a, b) => (b[1].date || "").localeCompare(a[1].date || ""));
+  if(loose.length){ h += `<h2>Observations sans tournée</h2>`;
+    for(const [, o] of loose){ const p = get("parcels", o.parcelId); h += `<div class="card"><b>${esc(frDate(o.date))}</b> · ${esc(p ? parcelName(p) : "Lieu entier")}${(o.rows || []).map(r => `<div class="obsrow ${esc(r.cat || catOfName(r.species) || "")}"><b>${esc(r.species || "—")}</b><span class="m">${esc(rowSummary(r))}</span></div>`).join("")}${o.note ? `<p class="muted">${esc(o.note)}</p>` : ""}${thumbsHTML(o.photoIds)}</div>`; } }
+  const lc = inG("checks").filter(([, c]) => !c.roundId).sort((a, b) => (b[1].date || "").localeCompare(a[1].date || ""));
+  if(lc.length){ h += `<h2>Relevés de pièges sans tournée</h2>`;
+    for(const [, c] of lc){ const tr = get("traps", c.trapId); h += `<div class="card"><b>${esc(frDate(c.date))}</b> · ${esc(tr ? trapLabel(tr) : "piège inconnu")}<div class="muted">${(c.counts || []).map(r => esc(r.species) + " : " + esc(r.n)).join(" · ") || "rien"}</div>${c.notes ? `<p class="muted">${esc(c.notes)}</p>` : ""}${thumbsHTML(c.photoIds)}</div>`; } }
+  const ib = inG("inbox"); if(ib.length){ h += `<h2>Photos non classées (${ib.length})</h2>${thumbsHTML(ib.map(([, i]) => i.photoId))}`; }
+  return {title:"Parcelle", html:h};
+};
+
+VIEWS.round = v => {
+  const r = get("rounds", v.id); if(!r) return {title:"Tournée", html:`<p class="muted">Tournée introuvable.</p>`};
+  const rf = (k, type, extra) => `<input type="${type || "text"}" data-rf="${k}" value="${esc(r[k] ?? "")}" ${extra || ""}>`;
+  let h = `<div class="card"><div class="g2">${fld("Date", rf("date", "date"))}${fld("Semaine", rf("week"))}</div>
+    ${fld("Dépisteur(s)", rf("scouts"))}
+    <div class="g3">${fld("Section", rf("section"))}${fld("Heure", rf("time", "time"))}${fld("Sem. de production", rf("prodWeek", "text", 'inputmode="numeric"'))}</div>
+    <div class="g2">${fld("Température (°C)", rf("temp", "text", 'inputmode="decimal"'))}${fld("Humidité relative (%)", rf("rh", "text", 'inputmode="decimal"'))}</div>
+    <label class="check"><input type="checkbox" data-rf="noScout" ${r.noScout ? "checked" : ""}> Pas de dépistage cette semaine</label>
+    ${r.noScout ? fld("Raison", rf("noScoutReason", "text", 'placeholder="p. ex. pas de cours"')) : ""}</div>`;
+  if(!r.noScout){
+    h += `<h2>Dépistage visuel</h2>`;
+    const ps = parcelsG(); if(!ps.length) h += `<p class="muted">Aucun groupe de plantes dans ce lieu. Ajoutez-en avec le bouton +.</p>`;
+    const obsHTML = pid => obsOfRound(v.id, pid).map(([oid, o]) => (o.rows || []).map(row => `<button class="obsrow ${esc(row.cat || "")}" data-act="editObs" data-id="${oid}"><b>${esc(row.species || CAT[row.cat] || "Observation")}${row.uncertain ? " ?" : ""}</b> ${row.confirm === "piste IA" ? `<span class="tag ia">piste IA</span>` : (row.confirm && row.confirm !== "moi" ? `<span class="tag">${esc(row.confirm)}</span>` : "")}${row.uncertain ? ` <span class="tag todo">à confirmer</span>` : ""}<span class="m">${esc(rowSummary(row)) || "&nbsp;"}${row.note ? " — " + esc(row.note) : ""}${(o.photoIds || []).length ? " · " + o.photoIds.length + " photo(s)" : ""}</span></button>`).join("")).join("");
+    for(const [pid, p] of ps){ const st = statusOf(r, v.id, pid); const n = obsOfRound(v.id, pid).length;
+      h += `<div class="card"><h3>${esc(parcelName(p))}</h3><div class="sub">${p.latin ? `<i class="lat">${esc(p.latin)}</i> · ` : ""}${p.nPlants ? esc(p.nPlants) + " plants" : ""}${p.position ? " · " + esc(p.position) : ""}</div>
+        <div class="seg"><button data-act="st" data-p="${pid}" data-v="" class="${st === "" ? "on" : ""}">Non dépisté</button><button data-act="st" data-p="${pid}" data-v="none" class="none ${st === "none" ? "on" : ""}">Rien vu</button><button data-act="newObs" data-p="${pid}" class="obs ${st === "obs" ? "on" : ""}">Observations${n ? " (" + n + ")" : ""}</button></div>
+        ${obsHTML(pid)}<div class="btns"><button class="btn" data-act="newObs" data-p="${pid}">+ Observation</button><button class="btn" data-act="diagNew" data-p="${pid}">Diagnostiquer une photo</button></div></div>`; }
+    h += `<div class="card"><h3>Section entière</h3><div class="sub">Adventices au sol, allées, observations générales</div>${obsHTML("")}<div class="btns"><button class="btn" data-act="newObs" data-p="" data-cat="weed">+ Adventice</button><button class="btn" data-act="newObs" data-p="">+ Observation</button></div></div>`;
+    h += `<h2>Dépistage des pièges</h2>`;
+    const ts = trapsG().filter(([, t]) => t.active !== false); if(!ts.length) h += `<p class="muted">Aucun piège actif.</p>`;
+    for(const [tid, tr] of ts){ const ck = checkOf(v.id, tid); const c = ck ? ck[1] : null; const host = get("parcels", tr.parcelId);
+      h += `<div class="card"><h3>${esc(trapLabel(tr))}</h3><div class="sub">${[host ? parcelName(host) : "", tr.height ? tr.height + " cm" : "", tr.orientation].filter(Boolean).map(esc).join(" · ")}</div>
+        <div class="seg"><button data-act="ckNone" data-t="${tid}" data-v="" class="${!c ? "on" : ""}">Non vérifié</button><button data-act="ckNone" data-t="${tid}" data-v="none" class="none ${c && !(c.counts || []).length ? "on" : ""}">Vérifié, rien</button><button data-act="newCap" data-t="${tid}" class="obs ${c && (c.counts || []).length ? "on" : ""}">Captures${c && (c.counts || []).length ? " (" + c.counts.length + ")" : ""}</button></div>
+        ${c ? (c.counts || []).map((row, i) => `<button class="obsrow" data-act="editCap" data-t="${tid}" data-i="${i}"><b>${esc(row.species || "—")}</b><span class="m">${[row.stage, "cette semaine : " + (row.n ?? ""), "cumul depuis le remplacement : " + cumul(tid, r.date, row.species)].filter(Boolean).map(esc).join(" · ")}</span></button>`).join("") : ""}
+        ${c ? `<label class="check"><input type="checkbox" data-ck="${tid}" ${c.replaced ? "checked" : ""}> Piège remplacé ce jour</label>` : ""}
+        <div class="btns"><button class="btn" data-act="newCap" data-t="${tid}">+ Capture</button></div></div>`; }
+  }
+  h += `<h2>Fiche et note</h2><div class="card">${fld("Note de la tournée", `<textarea data-rf="note">${esc(r.note || "")}</textarea>`)}
+    <div class="btns"><button class="btn primary" data-act="finishRound">${r.doneAt ? "Tournée terminée — sauvegarder de nouveau" : "Terminer la tournée et sauvegarder"}</button><button class="btn" data-act="printRound">Imprimer la fiche (2 copies)</button><button class="btn danger" data-act="delRound">Supprimer la tournée</button></div></div>`;
+  return {title:"Tournée " + (r.week || weekLabel(r.date)), html:h};
+};
+
+/* ---------- guide ---------- */
+function guideMatch(name, latin){ if(!S.guide) return null; const n = norm(name), l = norm(latin); const genus = l.split(" ")[0];
+  return S.guide.entries.find(e => (l && norm(e.latin) && (norm(e.latin) === l || norm(e.latin).split(" ")[0] === genus || norm(e.latin_actuel).startsWith(genus))) || (n && (norm(e.nom) === n || norm(e.nom).includes(n) || n.includes(norm(e.nom).split(" (")[0].split(" / ")[0])))) || null; }
+function seenByMe(e){ const keys = [norm(e.nom), norm(e.latin), norm(e.nom).split(" (")[0].split(" / ")[0]].filter(Boolean); const out = [];
+  for(const [, o] of live("obs")){ for(const r of (o.rows || [])){ const s = norm(r.species); if(s && keys.some(k => s === k || s.includes(k) || k.includes(s))){ const p = get("parcels", o.parcelId); const g = get("gardens", gardenOf(o)); out.push({date:o.date, week:weekLabel(o.date), culture:p ? parcelName(p) : "", lieu:g ? g.name : "", confirm:r.confirm || "", uncertain:r.uncertain}); } } }
+  return out.sort((a, b) => (b.date || "").localeCompare(a.date || "")); }
+VIEWS.guide = v => {
+  if(!S.guide) return {title:"Guide", html:`<div class="banner">Le guide n'a pas pu être chargé (data/guide.json). Ouvrez l'application une fois en ligne.</div>`};
+  const mode = v.mode || "fiches"; let h = `<div class="seg" style="margin:0 0 12px"><button data-act="guideMode" data-v="fiches" class="${mode === "fiches" ? "on" : ""}">Fiches</button><button data-act="guideMode" data-v="cle" class="${mode === "cle" ? "on" : ""}">Clé par symptôme</button></div>`;
+  const card = e => `<button class="obsrow ${e.cat}" data-act="openEntry" data-id="${e.id}"><b>${esc(e.nom)}</b>${e.latin ? ` <i class="lat">${esc(e.latin)}</i>` : ""} <span class="m">${esc(CAT[e.cat] || "")} · ${esc(e.type || "")}</span></button>`;
+  if(mode === "fiches"){
+    h += fld("Rechercher", `<input type="search" id="gq" value="${esc(v.q || "")}" placeholder="nom commun ou latin" autocomplete="off">`);
+    const q = norm(v.q); const es = S.guide.entries.filter(e => !q || norm(e.nom).includes(q) || norm(e.latin).includes(q) || norm(e.latin_actuel).includes(q));
+    for(const c of ["pest","aux","dis","abio","weed"]){ const l = es.filter(e => e.cat === c); if(l.length) h += `<h2>${CAT[c]}s</h2>` + l.map(card).join(""); }
+    if(!es.length) h += `<p class="muted">Aucune fiche.</p>`;
+    h += `<h2>Photos de référence</h2><div class="card"><p class="sub">${Object.values(S.credits || {}).flat().length} photos sous licence ouverte. Elles se chargent à la demande; pour la serre sans réseau, téléchargez-les d'avance.</p><div class="btns"><button class="btn" data-act="dlPhotos">Télécharger pour usage hors ligne</button><button class="btn" data-act="openCredits">Crédits photo</button></div><p class="muted" id="dlMsg"></p></div>`;
+    if((S.guide.en_attente || []).length) h += `<p class="muted">Fiches en préparation, publiées seulement une fois complètes et sourcées : ${S.guide.en_attente.map(esc).join(", ")}.</p>`;
+  } else {
+    h += `<div class="lbl">Partie de la plante</div><div class="chips" style="margin:6px 0 14px">${Object.entries(PARTS).map(([k, l]) => `<button data-act="kPart" data-v="${k}" class="${v.part === k ? "on" : ""}">${l}</button>`).join("")}</div>
+      <div class="lbl">Ce que je vois</div><div class="chips" style="margin:6px 0 14px">${Object.entries(S.guide.vu_labels).map(([k, l]) => `<button data-act="kVu" data-v="${k}" class="${v.vu === k ? "on" : ""}">${esc(l)}</button>`).join("")}</div>`;
+    if(v.vu){ const es = S.guide.entries.filter(e => (e.vu || []).includes(v.vu) && (!v.part || !(e.parties || []).length || e.parties.includes(v.part)));
+      h += `<h2>Candidats (${es.length})</h2><div class="banner">Liste de pistes, pas une identification. Vérifiez les signes à la loupe et gardez toujours une cause abiotique en tête.</div>` + (es.map(card).join("") || `<p class="muted">Aucune fiche du guide ne correspond pour l'instant.</p>`);
+      if(es.length && !es.some(e => e.cat === "abio")) h += `<p class="muted">Aucun désordre abiotique du guide n'est associé à ce symptôme pour l'instant : cela ne les exclut pas.</p>`;
+    } else h += `<p class="muted">Choisissez ce que vous voyez pour obtenir la liste des candidats du guide.</p>`;
+  }
+  return {title:"Guide", html:h};
+};
+const refPhotos = id => (S.credits && S.credits[id]) || [];
+const refHTML = (id, max) => { const ps = refPhotos(id).slice(0, max || 9); return ps.length ? `<div class="refs">${ps.map(p => `<figure><img loading="lazy" src="${esc(p.file)}" data-act="zoomSrc" data-src="${esc(p.file)}" alt="${esc(p.taxon)}"><figcaption><i class="lat">${esc(p.taxon)}</i> — ${esc(p.auteur)} · <a href="${esc(p.source)}" target="_blank" rel="noopener">source</a></figcaption></figure>`).join("")}</div>` : ""; };
+VIEWS.entry = v => {
+  const e = S.guide && S.guide.entries.find(x => x.id === v.id); if(!e) return {title:"Fiche", html:`<p class="muted">Fiche introuvable.</p>`};
+  const list = (t, a, cls) => `<div class="k ${cls || ""}">${t}</div><ul>${(a || []).map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
+  const txt = (t, x) => x ? `<div class="k">${t}</div><p>${esc(x)}</p>` : "";
+  const seen = seenByMe(e); const aux = e.cat === "aux"; const note = (get("notes", e.id) || {}).text || "";
+  let h = `<div class="cand"><span class="rk">${esc(CAT[e.cat] || "")} · ${esc(e.type || "")}</span><h3>${esc(e.nom)}</h3>${e.latin ? `<div><i class="lat">${esc(e.latin)}</i></div>` : ""}${e.latin_actuel ? `<div class="muted">Nom actuel : <i class="lat">${esc(e.latin_actuel)}</i></div>` : ""}
+    ${refHTML(e.id)}
+    ${txt("Description", e.description)}${list(aux ? "Comment le repérer" : "Signes (l'organisme ou ses produits)", e.signes)}${list(aux ? "Effet sur la culture" : "Symptômes (réaction de la plante)", e.symptomes)}${txt(aux ? "Conditions d'efficacité" : "Conditions favorables", e.conditions)}${txt(aux ? "Suivi" : "Méthode de dépistage", e.depistage)}${list("À ne pas confondre avec", e.ressemble)}${txt(aux ? "Proies" : "Hôtes", e.hotes)}${txt("À savoir", e.a_savoir)}
+    ${(e.vu || []).length ? `<div class="k">Ce qu'on voit (clé)</div><p>${e.vu.map(k => esc(S.guide.vu_labels[k] || k)).join(" · ")}</p>` : ""}
+    <div class="k">Sources</div><ul class="src">${(e.sources || []).map(x => { const r = S.guide.sources[x.s] || {}; return `<li>${esc(r.ref || x.s)} <b>${esc(x.ou || "")}</b>.${r.url ? ` <a href="${esc(r.url)}" target="_blank" rel="noopener">Ouvrir</a>.` : ""} Consulté le ${esc(frDate(r.consulte))}.</li>`; }).join("")}</ul>
+    ${e.latin ? `<div class="btns"><button class="btn" data-act="copy" data-t="${esc(e.latin.split(",")[0])}">Copier le nom latin</button></div>` : ""}</div>`;
+  h += `<h2>Mes notes</h2><div class="card">${fld("Notes de terrain personnelles (restent sur l'appareil et dans le journal)", `<textarea data-nf="${esc(e.id)}">${esc(note)}</textarea>`)}</div>`;
+  h += `<h2>Vu par moi (${seen.length})</h2>` + (seen.length ? seen.map(x => `<div class="obsrow"><b>${esc(frDate(x.date))} · ${esc(x.week)}</b><span class="m">${[x.lieu, x.culture, x.confirm ? "confirmé par : " + x.confirm : "", x.uncertain ? "à confirmer" : ""].filter(Boolean).map(esc).join(" · ")}</span></div>`).join("") : `<p class="muted">Pas encore observé.</p>`);
+  return {title:e.nom, html:h};
+};
+VIEWS.credits = () => { let h = `<div class="card"><p class="sub">Photos de référence sous licence ouverte (CC0 ou CC BY), tirées d'observations iNaturalist de qualité « recherche ». L'identification est celle de la communauté iNaturalist : elle peut contenir des erreurs. Chaque photo renvoie à son observation d'origine.</p></div>`;
+  for(const [id, ps] of Object.entries(S.credits || {})){ const e = S.guide && S.guide.entries.find(x => x.id === id); h += `<h2>${esc(e ? e.nom : id)}</h2>` + ps.map(p => `<div class="obsrow"><b><i class="lat">${esc(p.taxon)}</i></b><span class="m">${esc(p.auteur)} · ${esc(p.licence)} · <a href="${esc(p.source)}" target="_blank" rel="noopener">${esc(p.source)}</a> · redimensionnée</span></div>`).join(""); }
+  return {title:"Crédits photo", html:h}; };
+
+/* ---------- diagnostic photo (sans clé : aller-retour par l'application Claude) ---------- */
+function diagPrompt(d){ const c = d.context || {};
+  const ctx = [["Culture", [c.culture, c.latin ? "(" + c.latin + ")" : ""].filter(Boolean).join(" ")], ["Partie de la plante", PARTS[c.part] || ""], ["Lieu", c.lieu], ["Température (°C)", c.temp], ["Humidité relative (%)", c.rh], ["Arrosage / traitements récents", c.care], ["Depuis quand", c.since]].filter(x => x[1]).map(x => "- " + x[0] + " : " + x[1]).join("\n");
+  return `Tu agis comme conseiller en phytoprotection pour les cultures en serre et maraîchères du Québec. Analyse la ou les photos jointes (${(d.photoIds || []).length} photo(s)) et propose des pistes d'identification, pas un verdict.
+
+Contexte fourni par la dépisteuse :
+${ctx || "- (aucun)"}
+
+Réponds UNIQUEMENT par un objet JSON valide, en français, sans texte avant ni après, selon ce schéma :
+{
+  "qualite_photo": "bonne | moyenne | insuffisante",
+  "signes_vus": ["ce qui est visible de l'organisme ou de ses produits : individus, mycélium, miellat, toiles…"],
+  "symptomes_vus": ["réactions visibles de la plante : taches, chlorose, déformation…"],
+  "candidats": [
+    {
+      "nom_commun": "", "nom_latin": "",
+      "type": "insecte | acarien | champignon | oomycète | bactérie | virus | nématode | abiotique | adventice",
+      "confiance": "élevée | moyenne | faible",
+      "pour": ["indices dans la photo qui vont dans ce sens"],
+      "contre": ["indices qui ne collent pas"],
+      "verifier_sur_place": ["test concret : loupe sous les feuilles, feuille blanche, odeur, coupe de tige…"]
+    }
+  ],
+  "alternative_abiotique": "au moins une cause non parasitaire plausible (toujours remplie)",
+  "photo_supplementaire_utile": "quelle photo aiderait le plus"
+}
+
+Règles :
+- 1 à 4 candidats, classés du plus au moins probable.
+- Toujours au moins une cause abiotique ou un dégât mécanique ou d'insecte parmi les pistes; "alternative_abiotique" n'est jamais vide.
+- Distingue les signes (l'organisme lui-même ou ses produits) des symptômes (la réaction de la plante). Ne classe pas un symptôme comme un signe.
+- N'affirme rien qui ne soit pas visible dans les photos; une confiance « élevée » exige un signe visible.
+- Aucune recommandation de pesticide ni de traitement.
+- Si la qualité est « insuffisante », dis-le, laisse "candidats" vide si rien n'est défendable et précise la photo à refaire.`; }
+function parseDiag(text){
+  const errors = [], warnings = []; let obj = null;
+  const s = String(text || ""); const a = s.indexOf("{"), b = s.lastIndexOf("}");
+  if(a < 0 || b <= a) return {ok:false, errors:["Aucun objet JSON trouvé dans le texte collé."], warnings};
+  try{ obj = JSON.parse(s.slice(a, b + 1)); }catch(e){ return {ok:false, errors:["JSON illisible : " + e.message], warnings}; }
+  const arr = x => Array.isArray(x) ? x.filter(y => typeof y === "string" && y.trim()).map(y => y.trim()) : [];
+  const pick = (v, list) => { const n = norm(v); return list.find(x => norm(x) === n) || ""; };
+  const out = {qualite_photo:pick(obj.qualite_photo, ["bonne","moyenne","insuffisante"]), signes_vus:arr(obj.signes_vus), symptomes_vus:arr(obj.symptomes_vus), candidats:[], alternative_abiotique:typeof obj.alternative_abiotique === "string" ? obj.alternative_abiotique.trim() : "", photo_supplementaire_utile:typeof obj.photo_supplementaire_utile === "string" ? obj.photo_supplementaire_utile.trim() : ""};
+  if(!out.qualite_photo) errors.push("« qualite_photo » manquant ou invalide.");
+  if(!Array.isArray(obj.candidats)) errors.push("« candidats » manquant.");
+  for(const c of (Array.isArray(obj.candidats) ? obj.candidats : [])){ if(!c || typeof c !== "object") continue;
+    const k = {nom_commun:String(c.nom_commun || "").trim(), nom_latin:String(c.nom_latin || "").trim(), type:pick(c.type, DIAG_TYPES), confiance:pick(c.confiance, ["élevée","moyenne","faible"]), pour:arr(c.pour), contre:arr(c.contre), verifier_sur_place:arr(c.verifier_sur_place)};
+    if(!k.nom_commun && !k.nom_latin){ warnings.push("Un candidat sans nom a été écarté."); continue; }
+    if(!k.type) warnings.push("Type non reconnu pour « " + (k.nom_commun || k.nom_latin) + " »."); if(!k.confiance) warnings.push("Confiance non précisée pour « " + (k.nom_commun || k.nom_latin) + " ».");
+    if(!k.verifier_sur_place.length) warnings.push("Aucune vérification sur place proposée pour « " + (k.nom_commun || k.nom_latin) + " ».");
+    out.candidats.push(k); }
+  if(out.candidats.length > 4){ out.candidats = out.candidats.slice(0, 4); warnings.push("Plus de 4 candidats reçus : seuls les 4 premiers sont gardés."); }
+  if(!out.candidats.length && out.qualite_photo && out.qualite_photo !== "insuffisante") errors.push("Aucun candidat alors que la photo n'est pas jugée insuffisante.");
+  if(!out.alternative_abiotique && !out.candidats.some(c => c.type === "abiotique")) warnings.push("La réponse ne propose aucune cause abiotique : elle est incomplète. Gardez une cause non parasitaire en tête.");
+  if(/pesticide|fongicide|insecticide|acaricide|traitement recommand/i.test(JSON.stringify(obj))) warnings.push("La réponse mentionne un traitement : à ignorer, hors du rôle de l'application.");
+  return {ok:!errors.length, errors, warnings, data:out};
+}
+function diagResultHTML(d, did, show){
+  const r = d.result; if(!r) return ""; let h = "";
+  if(r.qualite_photo === "insuffisante") h += `<div class="banner alert"><b>Photo insuffisante.</b> Refaites une photo avant de vous fier à cette liste.${r.photo_supplementaire_utile ? " " + esc(r.photo_supplementaire_utile) : ""}</div>`;
+  h += `<div class="banner ia"><b>Piste IA, à vérifier — pas une identification.</b> Qualité de la photo : ${esc(r.qualite_photo)}.</div>`;
+  for(const w of (d.warnings || [])) h += `<div class="banner">${esc(w)}</div>`;
+  const ul = a => a.length ? `<ul>${a.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : `<p class="muted">—</p>`;
+  h += `<div class="cand"><div class="k">Signes vus (organisme ou ses produits)</div>${ul(r.signes_vus)}<div class="k">Symptômes vus (réaction de la plante)</div>${ul(r.symptomes_vus)}</div>`;
+  r.candidats.forEach((c, i) => { const ge = guideMatch(c.nom_commun, c.nom_latin);
+    h += `<div class="cand"><span class="rk">Piste ${i + 1} · ${esc(c.type || "type ?")} · confiance ${esc(c.confiance || "?")}</span><h3>${esc(c.nom_commun || c.nom_latin)}${d.acceptedIdx === i ? ` <span class="tag ia">retenue comme piste</span>` : ""}</h3>${c.nom_latin ? `<i class="lat">${esc(c.nom_latin)}</i>` : ""}
+      <div class="k pour">Pour</div>${ul(c.pour)}<div class="k contre">Contre</div>${ul(c.contre)}<div class="k verif">À vérifier sur place</div>${ul(c.verifier_sur_place)}${ge && refPhotos(ge.id).length ? `<div class="k">Photos de référence du guide (${esc(ge.nom)})</div>${refHTML(ge.id, 2)}` : ""}
+      ${show ? "" : `<div class="btns">${d.status === "pending" ? `<button class="btn primary" data-act="diagAccept" data-id="${did}" data-i="${i}">Ajouter à l'observation</button>` : ""}${ge ? `<button class="btn" data-act="openEntry" data-id="${ge.id}">Fiche du guide</button>` : ""}${c.nom_latin ? `<button class="btn" data-act="copy" data-t="${esc(c.nom_latin)}">Copier le nom latin</button>` : ""}</div>`}</div>`; });
+  h += `<div class="cand"><div class="k">Alternative abiotique</div><p>${esc(r.alternative_abiotique) || `<span class="muted">non fournie</span>`}</p><div class="k">Photo supplémentaire utile</div><p>${esc(r.photo_supplementaire_utile) || `<span class="muted">—</span>`}</p></div>`;
+  return h;
+}
+VIEWS.diag = v => {
+  const d = get("diags", v.id); if(!d) return {title:"Diagnostic", html:`<p class="muted">Diagnostic introuvable.</p>`};
+  const c = d.context || {}; const n = (d.photoIds || []).length; const cf = (k, type, extra) => `<input type="${type || "text"}" data-df="${k}" value="${esc(c[k] ?? "")}" ${extra || ""}>`;
+  let h = "";
+  if(!d.result){
+    h += `<h2>1 · Photos (${n}/4)</h2><div class="card"><p class="sub">Idéalement : ${PHOTO_SLOTS.map(esc).join(", ").toLowerCase()}.</p>${thumbsHTML(d.photoIds, "diagRmPhoto")}
+      ${n === 1 ? `<div class="banner" style="margin-top:10px">Une seule photo : ajoutez le dessous de la feuille et un gros plan du symptôme si possible.</div>` : ""}
+      ${n < 4 ? `<div class="btns"><button class="btn" data-act="diagPhoto" data-cam="1">Appareil photo</button><button class="btn" data-act="diagPhoto">Photothèque</button></div>` : ""}</div>
+      <h2>2 · Contexte (facultatif)</h2><div class="card"><div class="g2">${fld("Culture", cf("culture"))}${fld("Nom latin", cf("latin"))}</div>
+      <div class="g2">${fld("Partie de la plante", `<select data-df="part">${opt(PARTS, c.part, "—")}</select>`)}${fld("Serre ou jardin", cf("lieu"))}</div>
+      <div class="g2">${fld("Température (°C)", cf("temp", "text", 'inputmode="decimal"'))}${fld("Humidité relative (%)", cf("rh", "text", 'inputmode="decimal"'))}</div>
+      ${fld("Arrosage, traitements récents", cf("care"))}${fld("Depuis quand", cf("since"))}</div>
+      <h2>3 · Envoyer à Claude</h2><div class="card"><p class="sub">Parcelle n'envoie rien toute seule. Le bouton ouvre le partage de l'iPhone : choisissez l'application Claude. La demande est aussi copiée; collez-la dans le message si elle n'apparaît pas.</p>
+      <div class="btns"><button class="btn primary" data-act="diagShare" ${n ? "" : "disabled"}>Partager photos + demande</button><button class="btn" data-act="diagCopy">Copier la demande seule</button></div></div>
+      <h2>4 · Coller la réponse</h2><div class="card">${fld("Réponse de Claude (JSON)", `<textarea id="diagRaw" style="min-height:120px;font-family:var(--mono);font-size:14px" placeholder="{ … }">${esc(d.raw || "")}</textarea>`)}
+      ${fld("Modèle utilisé (tel qu'affiché dans Claude)", `<input id="diagModel" value="${esc(d.model || "")}" placeholder="p. ex. Claude Sonnet">`)}
+      ${(d.errors || []).map(e => `<div class="banner alert">${esc(e)}</div>`).join("")}
+      <div class="btns"><button class="btn" data-act="diagPaste">Coller</button><button class="btn primary" data-act="diagValidate">Valider la réponse</button></div></div>`;
+  } else {
+    h += thumbsHTML(d.photoIds) + `<p class="muted">${esc(frDate(d.date))}${d.model ? " · modèle : " + esc(d.model) : " · modèle non précisé"}${c.culture ? " · " + esc(c.culture) : ""}</p>`;
+    h += diagResultHTML(d, v.id);
+    h += `<div class="card"><div class="rowline"><div class="grow"><b>État : ${d.status === "accepted" ? "piste ajoutée à une observation" : d.status === "rejected" ? "rejeté" : "en attente"}</b></div></div>
+      <div class="g2">${fld("Identification finale (après vérification)", `<input data-dx="final" value="${esc(d.final || "")}" list="orgAll">`)}${fld("Confirmée par", `<select data-dx="finalBy">${opt(["moi","guide","prof"], d.finalBy, "—")}</select>`)}</div>
+      <label class="check"><input type="checkbox" data-dx="starred" ${d.starred ? "checked" : ""}> Garder dans « Cas présentés »</label>
+      <div class="btns">${d.status === "pending" ? `<button class="btn" data-act="diagReject" data-id="${v.id}">Rejeter</button>` : ""}<button class="btn" data-act="goKey">Ouvrir dans la clé</button><button class="btn" data-act="showCase" data-id="${v.id}">Vue présentation</button><button class="btn" data-act="diagRedo">Recoller une réponse</button></div></div>
+      <datalist id="orgAll">${allOrganismNames().map(x => `<option value="${esc(x)}">`).join("")}</datalist>`;
+  }
+  h += `<div class="btns"><button class="btn danger" data-act="diagDel">Supprimer ce diagnostic</button></div>`;
+  return {title:"Diagnostic photo", html:h};
+};
+VIEWS.cas = v => {
+  const ds = live("diags").sort((a, b) => (b[1].createdAt || 0) - (a[1].createdAt || 0)); const only = v.starred;
+  let h = `<button class="btn primary big" data-act="diagNew">Diagnostiquer une photo</button>
+    <div class="seg" style="margin:12px 0"><button data-act="casMode" data-v="" class="${!only ? "on" : ""}">Tous (${ds.length})</button><button data-act="casMode" data-v="1" class="${only ? "on" : ""}">Cas présentés (${ds.filter(([, d]) => d.starred).length})</button></div>`;
+  const l = ds.filter(([, d]) => !only || d.starred); if(!l.length) h += `<p class="muted">${only ? "Aucun cas gardé pour présentation. Ouvrez un diagnostic et cochez « Cas présentés »." : "Aucun diagnostic pour l'instant."}</p>`;
+  for(const [did, d] of l){ const r = d.result; const first = r && r.candidats[0];
+    h += `<div class="card"><div class="rowline">${(d.photoIds || [])[0] ? `<div class="thumbs" style="margin:0"><div class="ph"><img data-thumb="${esc(d.photoIds[0])}" alt=""></div></div>` : ""}<div class="grow"><b>${esc(frDate(d.date))}${(d.context || {}).culture ? " · " + esc(d.context.culture) : ""}</b><div class="sub">${r ? "1re piste IA : " + esc(first ? (first.nom_commun || first.nom_latin) : "aucune") : "réponse à coller"}</div><div class="sub">${d.final ? "Identification finale : <b>" + esc(d.final) + "</b>" + (d.finalBy ? " (" + esc(d.finalBy) + ")" : "") : "Identification finale : à venir"}</div></div></div>
+      <div class="btns"><button class="btn" data-act="openDiag" data-id="${did}">Ouvrir</button>${r ? `<button class="btn" data-act="showCase" data-id="${did}">Présenter</button>` : ""}</div></div>`; }
+  return {title:"Diagnostics", html:h};
+};
+
+/* ---------- réglages ---------- */
+VIEWS.reglages = () => {
+  const s = settings(); const days = S.meta.lastBackup ? Math.floor((Date.now() - S.meta.lastBackup) / 86400000) : null; let oldKey = false; try{ oldKey = !!localStorage.getItem("gp_data_v1"); }catch(e){}
+  const counts = ["rounds","obs","checks","diags"].map(c => live(c).length);
+  let h = `<h2>Sauvegarde et synchronisation</h2><div class="card"><p class="sub">Les données vivent sur cet appareil seulement. Pour passer de l'iPhone à l'ordinateur : exporter le journal ici, puis l'importer là-bas. L'import fusionne par identifiant et par date de modification; il n'écrase jamais à l'aveugle et ne crée pas de doublons.</p>
+    <p><b>Dernière sauvegarde : ${days === null ? "jamais" : days === 0 ? "aujourd'hui" : "il y a " + days + " jour" + (days > 1 ? "s" : "")}</b></p>
+    <div class="btns"><button class="btn primary" data-act="exportJournal">Exporter le journal (JSON)</button><button class="btn" data-act="importJournal">Importer un journal</button></div><p class="muted" id="ioMsg"></p>
+    <p class="muted">${counts[0]} tournée(s) · ${counts[1]} observation(s) · ${counts[2]} relevé(s) de piège · ${counts[3]} diagnostic(s). <span id="stoMsg"></span></p></div>
+    <h2>Exports pour le rapport</h2><div class="card"><p class="sub">Données brutes seulement : l'application n'écrit aucune phrase de rapport et n'interprète rien.</p><div class="btns"><button class="btn" data-act="csvObs">CSV — observations</button><button class="btn" data-act="csvTraps">CSV — pièges</button></div></div>
+    <h2>Échelle 0–10</h2><div class="card">${fld("Repères (imprimés sur la fiche)", `<textarea data-sf="anchors">${esc(s.anchors || DEFAULT_ANCHORS)}</textarea>`)}${fld("Dépisteur(s) par défaut", `<input data-sf="scouts" value="${esc(s.scouts || "")}" placeholder="Sawaka, Cindy">`)}</div>
+    <h2>Anciennes données</h2><div class="card"><p class="sub">${S.meta.migratedV1 ? "Données de la version 1 reprises le " + esc(frDate(iso(new Date(S.meta.migratedV1.at)))) + "." : "Aucune donnée de la version 1 trouvée sur ce site. Importez plutôt le fichier de sauvegarde ou le journal de l'ancienne version avec « Importer un journal »."}</p>
+    ${oldKey ? `<p class="sub">La copie d'origine (gp_data_v1) est toujours là, intacte.</p><div class="btns"><button class="btn danger" data-act="dropOld">Supprimer la copie de secours v1</button></div>` : ""}</div>
+    <h2>À propos</h2><div class="card"><h3>Parcelle ${VERSION}</h3><p>Carnet de dépistage pour la serre et le jardin, avec guide hors ligne.</p>
+    <p><b>Cette application a été construite avec Claude (Anthropic), un outil d'intelligence artificielle.</b> Les observations, les décomptes et les identifications confirmées sont ceux de la dépisteuse. Toute identification proposée par l'IA à partir d'une photo est marquée « piste IA » et le reste dans les exports (colonnes identification_initiale_ia et confirme_par).</p>
+    <p class="muted">Aucune donnée ne quitte l'appareil sans une action explicite (export ou partage). Aucun compte, aucun serveur, aucune clé. Le diagnostic photo passe par l'application Claude de l'utilisatrice, par le partage de l'iPhone.</p>
+    <p><b>Sources du guide.</b> Chaque fiche cite ses sources (publication, section, page). Seules des sources gouvernementales et universitaires sont utilisées, d'abord les publications du ministère de l'Agriculture de l'Ontario (OMAFRA). Ces publications sont écrites pour l'Ontario : la biologie et l'identification valent pour le Québec, mais pas les homologations de produits ni certaines pressions régionales. Parcelle ne donne aucune recommandation de traitement.</p>
+    <p class="muted">Guide : ${S.guide ? S.guide.entries.length + " fiches · version " + esc(S.guide.version) : "non chargé"}. <button class="btn ghost" data-act="openCredits">Crédits photo</button></p>
+    <div class="k lbl">Journal des versions</div><p class="muted"><b>3.1.0</b> (16 nov. 2026) — guide réécrit à partir de sources citées, photos de référence, notes personnelles par fiche, sauvegarde en fin de tournée. <b>3.0.0</b> (15 nov. 2026) — première version GitHub Pages : tournées, pièges, exports, journal, diagnostic photo par partage.</p></div>`;
+  setTimeout(async () => { try{ const e = await navigator.storage.estimate(); const el = $("#stoMsg"); if(el) el.textContent = "Espace utilisé : " + (e.usage / 1048576).toFixed(1) + " Mo."; }catch(e){} }, 0);
+  return {title:"Réglages", html:h};
+};
+
+/* ---------- feuilles (formulaires) ---------- */
+let sheetSave = null, sheetDraft = null;
+function openSheet(title, body, onSave, extraBtn){ closeSheet(); sheetSave = onSave || null; const d = document.createElement("div"); d.id = "sheet";
+  d.innerHTML = `<div class="box"><div class="sh"><h3>${esc(title)}</h3><button class="btn ghost" data-act="closeSheet">Fermer</button></div><div class="sb">${body}</div>${onSave ? `<div class="sf">${extraBtn || ""}<button class="btn primary" data-act="saveSheet">Enregistrer</button></div>` : ""}</div>`;
+  d.addEventListener("click", e => { if(e.target === d) closeSheet(); }); document.body.append(d); hydrateThumbs(d); }
+function closeSheet(){ const s = $("#sheet"); if(s) s.remove(); sheetSave = null; }
+const val = id => { const el = document.getElementById(id); return el ? (el.type === "checkbox" ? el.checked : el.value.trim()) : ""; };
+const stepper = (id, v) => `<div class="step"><button type="button" data-act="stepDn" data-for="${id}">−</button><input id="${id}" inputmode="numeric" value="${esc(v ?? "")}"><button type="button" data-act="stepUp" data-for="${id}">+</button></div>`;
+
+function gardenSheet(id){ const g = id ? get("gardens", id) : {kind:"serre"}; const serre = g.kind === "serre";
+  openSheet(id ? "Modifier le lieu" : "Nouveau lieu", `${id ? "" : fld("Type", `<select id="f_kind">${opt({serre:"Serre", jardin:"Jardin"}, g.kind)}</select>`)}${fld("Nom", `<input id="f_name" value="${esc(g.name || "")}" placeholder="Serre 3">`)}
+    ${serre || !id ? `<div class="g2">${fld("Section", `<input id="f_section" value="${esc(g.section || "")}">`)}${fld("Partenaire(s)", `<input id="f_partners" value="${esc(g.partners || "")}">`)}</div>` : ""}
+    ${id ? `<div class="btns"><button class="btn danger" data-act="delGarden" data-id="${id}">Supprimer ce lieu</button></div>` : ""}`,
+    async () => { const name = val("f_name"); if(!name){ toast("Donnez un nom au lieu."); return false; } const nid = id || uid();
+      const doc = {...g, name, section:val("f_section") || g.section || "", partners:val("f_partners") || g.partners || ""}; if(!id){ doc.kind = val("f_kind") || "serre"; doc.createdAt = Date.now(); doc.order = gardenList().length; }
+      delete doc._stub; await put("gardens", nid, doc); if(!id){ S.gid = nid; metaSet("gid", nid); } }); }
+function parcelSheet(id){ const p = id ? get("parcels", id) : {}; const serre = isSerre(curGarden());
+  openSheet(id ? "Modifier le groupe" : (serre ? "Nouveau groupe de plantes" : "Nouvelle parcelle"), `${fld("Culture (nom commun)", `<input id="f_name" value="${esc(p.name || p.crop || "")}" placeholder="Géranium citronnelle">`)}${fld("Nom latin", `<input id="f_latin" value="${esc(p.latin || "")}" placeholder="Pelargonium sp." autocapitalize="off" autocorrect="off">`)}
+    <div class="g2">${fld("Nombre de plants", stepper("f_n", p.nPlants))}${fld("Position sur la table", `<input id="f_pos" value="${esc(p.position || "")}">`)}</div>${fld("Notes", `<textarea id="f_notes">${esc(p.notes || "")}</textarea>`)}
+    ${id ? `<div class="btns"><button class="btn danger" data-act="delParcel" data-id="${id}">Supprimer ce groupe</button></div>` : ""}`,
+    async () => { const name = val("f_name"); if(!name){ toast("Donnez un nom de culture."); return false; } const doc = {...p, name, latin:val("f_latin"), nPlants:num(val("f_n")), position:val("f_pos"), notes:val("f_notes")}; delete doc._stub;
+      if(!id){ doc.gardenId = S.gid; doc.createdAt = Date.now(); } await put("parcels", id || uid(), doc); }); }
+function trapSheet(id){ const t = id ? get("traps", id) : {type:"sticky_yellow", dateSet:today(), active:true};
+  openSheet(id ? "Modifier le piège" : "Nouveau piège", `${fld("Type", `<select id="f_type">${opt(TRAP_TYPES, t.type)}</select>`)}${fld("Étiquette", `<input id="f_label" value="${esc(t.label || "")}" placeholder="Table 2 — Sawaka et Cindy">`)}
+    ${fld("Groupe de plantes", `<select id="f_parcel">${opt(Object.fromEntries(parcelsG().map(([pid, p]) => [pid, parcelName(p)])), t.parcelId, "— aucun —")}</select>`)}
+    <div class="g2">${fld("Date de pose", `<input type="date" id="f_set" value="${esc(t.dateSet || "")}">`)}${fld("Date de remplacement", `<input type="date" id="f_rep" value="${esc(t.dateReplaced || "")}">`)}</div>
+    <div class="g2">${fld("Hauteur au-dessus du sol (cm)", `<input id="f_h" inputmode="decimal" value="${esc(t.height ?? "")}">`)}${fld("Orientation", `<select id="f_or">${opt(["verticale","horizontale, face vers le bas"], t.orientation, "—")}</select>`)}</div>
+    ${fld("Cible", `<input id="f_target" value="${esc(t.target || "")}">`)}${fld("Notes", `<textarea id="f_notes">${esc(t.notes || t.protocol || "")}</textarea>`)}
+    <label class="check"><input type="checkbox" id="f_active" ${t.active !== false ? "checked" : ""}> Piège en place</label>
+    ${id ? `<div class="btns"><button class="btn danger" data-act="delTrap" data-id="${id}">Supprimer ce piège</button></div>` : ""}`,
+    async () => { const doc = {...t, type:val("f_type"), label:val("f_label"), parcelId:val("f_parcel"), dateSet:val("f_set"), dateReplaced:val("f_rep"), height:num(val("f_h")), orientation:val("f_or"), target:val("f_target"), notes:val("f_notes"), active:val("f_active")}; delete doc._stub;
+      if(t.protocol && doc.notes === t.protocol) { doc.notes = t.notes || ""; }
+      if(!id){ doc.gardenId = S.gid; doc.createdAt = Date.now(); } await put("traps", id || uid(), doc); }); }
+
+function obsSheet(rid, pid, oid, preset){
+  const o = oid ? get("obs", oid) : null; const row = o ? {...(o.rows || [{}])[0]} : {cat:(preset && preset.cat) || "pest", confirm:"moi", ...(preset || {})};
+  const p = get("parcels", pid); sheetDraft = {photoIds:o ? [...(o.photoIds || [])] : [...((preset && preset.photoIds) || [])], rating:row.rating ?? "", cat:row.cat || "unk"};
+  const body = () => `<div class="lbl">Catégorie</div><div class="chips" style="margin:6px 0 12px" id="catChips">${Object.entries(CAT).map(([k, l]) => `<button type="button" data-act="oCat" data-v="${k}" class="${sheetDraft.cat === k ? "on" : ""}">${l}</button>`).join("")}</div>
+    ${fld("Organisme", `<input id="o_species" value="${esc(row.species || "")}" list="orgList" autocomplete="off" placeholder="liste ou texte libre"><datalist id="orgList">${allOrganismNames(sheetDraft.cat).map(x => `<option value="${esc(x)}">`).join("")}</datalist>`)}
+    <label class="check"><input type="checkbox" id="o_unc" ${row.uncertain ? "checked" : ""}> « ? » — à confirmer</label>
+    ${fld("Stade", `<select id="o_stage">${opt(STAGES, row.stage, "n/a")}</select>`)}
+    ${fld("Nombre (décompte)", stepper("o_n", row.n))}
+    <div class="field"><label>Évaluation 0–10 (distincte du nombre)</label><div class="rate" id="o_rate">${Array.from({length:11}, (_, i) => `<button type="button" data-act="oRate" data-v="${i}" class="${String(sheetDraft.rating) === String(i) ? "on" : ""}">${i}</button>`).join("")}</div><div class="muted">${esc(anchors())}. Touchez de nouveau pour effacer.</div></div>
+    ${row.sev ? `<div class="banner">Ancienne échelle 1–5 : ${esc(row.sev)} (conservée telle quelle, non convertie).</div>` : ""}
+    <div class="g2">${fld("Plants touchés", stepper("o_touch", row.touched))}${fld("Plants examinés", stepper("o_exam", row.examined ?? (o ? "" : (p && p.nPlants) || "")))}</div>
+    <div class="g2">${fld("Partie de la plante", `<select id="o_part">${opt(PARTS, row.part, "—")}</select>`)}${fld("Méthode", `<select id="o_method">${opt(METHODS, row.method || (o ? "" : "visuel"), "—")}</select>`)}</div>
+    ${fld("Note", `<textarea id="o_note">${esc(row.note || (o && o.note) || "")}</textarea>`)}
+    ${fld("Confirmé par", `<select id="o_conf">${opt(CONFIRM, row.confirm || "moi")}</select>`)}
+    ${row.iaInitial ? `<div class="banner ia">Identification initiale par IA : ${esc(row.iaInitial)}. Cette mention reste dans les exports même si « confirmé par » change.</div>` : ""}
+    <div class="lbl">Photos</div><div id="o_photos">${thumbsHTML(sheetDraft.photoIds, "oRmPhoto")}</div><div class="btns"><button type="button" class="btn" data-act="oPhoto" data-cam="1">Appareil photo</button><button type="button" class="btn" data-act="oPhoto">Photothèque</button></div>
+    ${oid ? `<div class="btns"><button class="btn danger" data-act="delObs" data-id="${oid}">Supprimer l'observation</button></div>` : ""}`;
+  openSheet((oid ? "Observation" : "Nouvelle observation") + " — " + (p ? parcelName(p) : "Section entière"), body(), async () => {
+    const species = val("o_species");
+    const nr = {...row, cat:sheetDraft.cat, species, uncertain:val("o_unc"), stage:val("o_stage"), n:num(val("o_n")), rating:num(sheetDraft.rating), touched:num(val("o_touch")), examined:num(val("o_exam")), part:val("o_part"), method:val("o_method"), note:val("o_note"), confirm:val("o_conf")};
+    if(!species && nr.n === "" && nr.rating === "" && !nr.note && !sheetDraft.photoIds.length){ toast("Observation vide : indiquez au moins un organisme, un nombre, une évaluation ou une note."); return false; }
+    const r = get("rounds", rid); const doc = o ? {...o} : {gardenId:r ? r.gardenId : S.gid, roundId:rid || "", parcelId:pid || "", date:r ? r.date : today(), createdAt:Date.now()};
+    doc.rows = o && (o.rows || []).length > 1 ? [nr, ...o.rows.slice(1)] : [nr]; doc.photoIds = sheetDraft.photoIds; if(o) doc.note = "";
+    await put("obs", oid || uid(), doc);
+  });
+}
+function capSheet(rid, tid, idx){ const r = get("rounds", rid); const ck = checkOf(rid, tid); const row = ck && idx !== undefined ? ck[1].counts[idx] : {};
+  openSheet("Capture — " + trapLabel(get("traps", tid) || {}), `${fld("Espèce", `<input id="c_species" value="${esc(row.species || "")}" list="orgList" autocomplete="off"><datalist id="orgList">${allOrganismNames().map(x => `<option value="${esc(x)}">`).join("")}</datalist>`)}
+    ${fld("Stade", `<select id="c_stage">${opt(STAGES, row.stage, "n/a")}</select>`)}${fld("Nouvelles captures cette semaine", stepper("c_n", row.n))}<p class="muted">Le cumul depuis le dernier remplacement de la carte est calculé automatiquement.</p>
+    ${idx !== undefined ? `<div class="btns"><button class="btn danger" data-act="delCap" data-t="${tid}" data-i="${idx}">Supprimer cette capture</button></div>` : ""}`,
+    async () => { const species = val("c_species"); if(!species){ toast("Indiquez l'espèce."); return false; } const nr = {species, stage:val("c_stage"), n:num(val("c_n"))};
+      const doc = ck ? {...ck[1], counts:[...(ck[1].counts || [])]} : {trapId:tid, roundId:rid, gardenId:r.gardenId, date:r.date, counts:[], createdAt:Date.now()};
+      if(idx !== undefined) doc.counts[idx] = nr; else doc.counts.push(nr); await put("checks", ck ? ck[0] : uid(), doc); }); }
+
+/* ---------- photos ---------- */
+function drawTo(img, maxPx, q){ const s = Math.min(1, maxPx / Math.max(img.width, img.height)); const cv = document.createElement("canvas"); cv.width = Math.max(1, Math.round(img.width * s)); cv.height = Math.max(1, Math.round(img.height * s)); const cx = cv.getContext("2d"); cx.fillStyle = "#fff"; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(img, 0, 0, cv.width, cv.height); return cv.toDataURL("image/jpeg", q); }
+function prepImage(file){ return new Promise((res, rej) => { const url = URL.createObjectURL(file); const img = new Image(); img.onload = () => { URL.revokeObjectURL(url); try{ res({data:drawTo(img, 1568, .8), thumb:drawTo(img, 240, .6), w:img.width, h:img.height, at:Date.now()}); }catch(e){ rej(e); } }; img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("image illisible")); }; img.src = url; }); }
+function pickPhotos(camera, max){ return new Promise(res => { const inp = document.createElement("input"); inp.type = "file"; inp.accept = "image/*"; if(camera) inp.capture = "environment"; else inp.multiple = true;
+  inp.onchange = async () => { const ids = []; for(const f of [...inp.files].slice(0, max || 8)){ try{ const rec = await prepImage(f); const id = uid(); if(await photoPut(id, rec)) ids.push(id); }catch(e){ toast("Photo non lue : " + e.message); } } res(ids); }; inp.click(); }); }
+async function zoom(id){ const p = await photoGet(id); if(!p) return toast("Photo absente de cet appareil."); const d = document.createElement("div"); d.id = "lightbox"; d.innerHTML = `<img src="${p.data}" alt="">`; d.onclick = () => d.remove(); document.body.append(d); }
+function dataURLtoFile(d, name){ const [h, b] = d.split(","); const mime = /data:(.*?);/.exec(h)[1]; const bin = atob(b); const arr = new Uint8Array(bin.length); for(let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i); return new File([arr], name, {type:mime}); }
+
+/* ---------- exports ---------- */
+async function saveFile(name, text, mime){ const blob = new Blob([text], {type:mime}); const f = new File([blob], name, {type:mime});
+  if(coarse() && navigator.canShare && navigator.canShare({files:[f]})){ try{ await navigator.share({files:[f], title:name}); return true; }catch(e){ if(e.name === "AbortError") return false; } }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 3000); return true; }
+const csv = rows => "﻿" + rows.map(r => r.map(v => { v = String(v ?? ""); return /[",;\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v; }).join(",")).join("\r\n");
+function buildObsCSV(){
+  const H = ["lieu","type_lieu","date","semaine","depisteurs","section","heure","temperature_c","humidite_pct","culture","nom_latin_culture","statut_groupe","categorie","organisme","a_confirmer","stade","nombre","evaluation_0_10","ancienne_echelle_1_5","plants_touches","plants_examines","partie","methode","note","identification_initiale_ia","confirme_par","nb_photos"];
+  const rows = [H];
+  const line = (g, r, p, st, o, row) => [g ? g.name : "", g ? (g.kind || "jardin") : "", (o && o.date) || (r && r.date) || "", weekLabel((o && o.date) || (r && r.date)), r ? r.scouts || "" : "", r ? r.section || "" : "", r ? r.time || "" : "", r ? r.temp ?? "" : "", r ? r.rh ?? "" : "", p ? parcelName(p) : (o || st === "obs" ? "Section entière" : ""), p ? p.latin || "" : "", st,
+    row ? (CAT[row.cat || catOfName(row.species)] || "") : "", row ? row.species || "" : "", row && row.uncertain ? "oui" : "", row ? row.stage || "" : "", row ? row.n ?? "" : "", row ? row.rating ?? "" : (st === STATUS_LABEL.none ? 0 : ""), row ? row.sev || "" : "", row ? row.touched ?? "" : "", row ? row.examined ?? "" : "", row && row.part ? PARTS[row.part] || row.part : "", row ? row.method || "" : "", row ? row.note || (o && o.note) || "" : (o && o.note) || "", row ? row.iaInitial || "" : "", row ? row.confirm || "" : "", o ? (o.photoIds || []).length : ""];
+  const rounds = live("rounds").sort((a, b) => (a[1].date || "").localeCompare(b[1].date || ""));
+  for(const [rid, r] of rounds){ const g = get("gardens", gardenOf(r));
+    if(r.noScout){ rows.push(line(g, r, null, "pas de dépistage" + (r.noScoutReason ? " (" + r.noScoutReason + ")" : ""), null, null)); continue; }
+    const ps = live("parcels").filter(([, p]) => gardenOf(p) === gardenOf(r)).sort((a, b) => (a[1].createdAt || 0) - (b[1].createdAt || 0));
+    for(const [pid, p] of ps){ const os = obsOfRound(rid, pid); const st = statusOf(r, rid, pid);
+      if(!os.length){ rows.push(line(g, r, p, STATUS_LABEL[st], null, null)); continue; }   /* non dépisté : cellules vides, jamais 0 */
+      for(const [, o] of os) for(const row of (o.rows || [])) rows.push(line(g, r, p, STATUS_LABEL.obs, o, row)); }
+    for(const [, o] of obsOfRound(rid, "")) for(const row of (o.rows || [])) rows.push(line(g, r, null, "obs", o, row).map((v, i) => i === 11 ? STATUS_LABEL.obs : v));
+  }
+  for(const [, o] of live("obs").filter(([, o]) => !o.roundId).sort((a, b) => (a[1].date || "").localeCompare(b[1].date || ""))){ const g = get("gardens", gardenOf(o)); const p = get("parcels", o.parcelId);
+    const rs = (o.rows || []).length ? o.rows : [null]; for(const row of rs) rows.push(line(g, null, p, "", o, row)); }
+  return csv(rows);
+}
+function buildTrapCSV(){ const rows = [["lieu","piege","type_piege","culture","date_pose","hauteur_cm","orientation","date_releve","semaine","espece","stade","nouvelles_captures","cumul_depuis_remplacement","piege_remplace_ce_jour","note"]];
+  for(const [tid, tr] of live("traps")){ const g = get("gardens", gardenOf(tr)); const host = get("parcels", tr.parcelId); const base = [g ? g.name : "", tr.label || "", TRAP_TYPES[tr.type] || tr.type || "", host ? parcelName(host) : "", tr.dateSet || "", tr.height ?? "", tr.orientation || ""];
+    const cs = live("checks").filter(([, c]) => c.trapId === tid).sort((a, b) => (a[1].date || "").localeCompare(b[1].date || ""));
+    for(const [, c] of cs){ const tail = [c.replaced ? "oui" : "", c.notes || ""]; if(!(c.counts || []).length){ rows.push([...base, c.date, weekLabel(c.date), "", "", 0, "", ...tail]); continue; }
+      for(const r of c.counts) rows.push([...base, c.date, weekLabel(c.date), r.species || "", r.stage || "", r.n ?? "", cumul(tid, c.date, r.species), ...tail]); } }
+  return csv(rows); }
+async function exportJournal(){ const msg = $("#ioMsg"); if(msg) msg.textContent = "Préparation…";
+  const payload = {app:"parcelle", version:3, exportedAt:new Date().toISOString()}; for(const c of COLLS) payload[c] = S.all[c]; payload.photos = await allPhotos();
+  const text = JSON.stringify(payload); const ok = await saveFile("parcelle-journal-" + today() + ".json", text, "application/json");
+  if(ok){ await metaSet("lastBackup", Date.now()); } if($("#ioMsg")) $("#ioMsg").textContent = ok ? "Journal exporté (" + (text.length / 1048576).toFixed(1) + " Mo)." : "Export annulé."; if(ok && !$("#sheet")) render(); }
+function importJournal(){ const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".json,application/json";
+  inp.onchange = async () => { const f = inp.files[0]; if(!f) return; const msg = $("#ioMsg"); if(msg) msg.textContent = "Lecture…"; let d = null; try{ d = JSON.parse(await f.text()); }catch(e){}
+    if(!d || d.app !== "parcelle"){ if(msg) msg.textContent = "Ce fichier n'est pas un journal Parcelle."; return; }
+    const st = await mergeData(d); if(!S.gid || !get("gardens", S.gid)) S.gid = defaultGid(); render();
+    const m = $("#ioMsg"); if(m) m.textContent = "Import terminé : " + st.added + " ajouté(s), " + st.updated + " mis à jour, " + st.same + " déjà présent(s) et laissé(s) tels quels, " + st.photos + " photo(s) ajoutée(s)."; };
+  inp.click(); }
+
+/* ---------- fiche hebdomadaire (mise en page de la consigne du Lab 4) ---------- */
+function ficheHTML(rid){ const r = get("rounds", rid); const g = get("gardens", gardenOf(r)); const ps = live("parcels").filter(([, p]) => gardenOf(p) === gardenOf(r)).sort((a, b) => (a[1].createdAt || 0) - (b[1].createdAt || 0));
+  const cult = p => p ? esc(parcelName(p)) + (p.latin ? ` <i>(${esc(p.latin)})</i>` : "") : "Section entière"; const sp = row => esc(row.species || "") + (row.uncertain ? " ?" : "");
+  let traps = ""; for(const [tid, tr] of live("traps").filter(([, t]) => gardenOf(t) === gardenOf(r) && t.active !== false)){ const ck = checkOf(rid, tid); const host = get("parcels", tr.parcelId); const ty = esc(trapLabel(tr));
+    if(!ck) traps += `<tr><td>${host ? cult(host) : ""}</td><td></td><td>non vérifié</td><td>${ty}</td></tr>`;
+    else if(!(ck[1].counts || []).length) traps += `<tr><td>${host ? cult(host) : ""}</td><td>aucune capture</td><td>0</td><td>${ty}${ck[1].replaced ? " — remplacé" : ""}</td></tr>`;
+    else for(const row of ck[1].counts) traps += `<tr><td>${host ? cult(host) : ""}</td><td>${sp(row)}</td><td>${[row.stage, "nouvelles : " + (row.n ?? ""), "cumul : " + cumul(tid, r.date, row.species)].filter(Boolean).map(esc).join(" · ")}</td><td>${ty}${ck[1].replaced ? " — remplacé" : ""}</td></tr>`; }
+  let vis = "", weeds = "";
+  const visRow = (p, o, row) => `<tr><td>${cult(p)}</td><td>${sp(row)}${row.confirm && row.confirm !== "moi" ? ` <small>[${esc(row.confirm)}]</small>` : ""}</td><td>${esc(row.examined ?? "")}${row.touched !== "" && row.touched != null ? " (touchés : " + esc(row.touched) + ")" : ""}</td><td>${esc(row.stage || "")}</td><td>${[row.rating !== "" && row.rating != null ? row.rating + "/10" : "", row.n !== "" && row.n != null ? "nombre : " + row.n : "", row.sev ? "anc. échelle 1–5 : " + row.sev : ""].filter(Boolean).map(esc).join(" · ")}</td><td>${[row.part && PARTS[row.part], row.method, row.note].filter(Boolean).map(esc).join(" · ")}</td></tr>`;
+  for(const [pid, p] of ps){ const st = statusOf(r, rid, pid); const os = obsOfRound(rid, pid);
+    if(!os.length) vis += `<tr><td>${cult(p)}</td><td>${st === "none" ? "rien observé" : ""}</td><td>${st === "none" ? esc(p.nPlants ?? "") : ""}</td><td></td><td>${st === "none" ? "0/10" : ""}</td><td>${st === "none" ? "" : "non dépisté"}</td></tr>`;
+    for(const [, o] of os) for(const row of (o.rows || [])){ if(row.cat === "weed") weeds += `<tr><td>${cult(p)}</td><td>${sp(row)}</td><td>${esc(row.stage || "")}</td><td>${[row.rating !== "" && row.rating != null ? row.rating + "/10" : "", row.n !== "" && row.n != null ? "nombre : " + row.n : "", row.note].filter(Boolean).map(esc).join(" · ")}</td></tr>`; else vis += visRow(p, o, row); } }
+  for(const [, o] of obsOfRound(rid, "")) for(const row of (o.rows || [])){ if(row.cat === "weed") weeds += `<tr><td>Section entière</td><td>${sp(row)}</td><td>${esc(row.stage || "")}</td><td>${[row.rating !== "" && row.rating != null ? row.rating + "/10" : "", row.n !== "" && row.n != null ? "nombre : " + row.n : "", row.note].filter(Boolean).map(esc).join(" · ")}</td></tr>`; else vis += visRow(null, o, row); }
+  const empty = n => `<tr>${"<td>&nbsp;</td>".repeat(n)}</tr>`;
+  return `<h1>Fiche de dépistage — ${esc(g ? g.name : "")}</h1>
+    <div class="hd"><div><b>Date :</b> ${esc(frDate(r.date))} (${esc(r.week || weekLabel(r.date))})</div><div><b># semaine de production :</b> ${esc(r.prodWeek || "")}</div><div><b>Dépisteur :</b> ${esc(r.scouts || "")}</div><div><b># de section :</b> ${esc(r.section || "")}</div></div>
+    <p style="margin:4pt 0">${[r.time ? "Heure : " + r.time : "", r.temp !== "" && r.temp != null ? "Température : " + r.temp + " °C" : "", r.rh !== "" && r.rh != null ? "Humidité relative : " + r.rh + " %" : ""].filter(Boolean).map(esc).join(" · ")}</p>
+    ${r.noScout ? `<p><b>Pas de dépistage cette semaine${r.noScoutReason ? " : " + esc(r.noScoutReason) : ""}.</b></p>` : `
+    <h2>Dépistage des pièges</h2><table><tr><th>Culture</th><th>Espèce</th><th>Stade(s) et quantité</th><th>Type de piège</th></tr>${traps || empty(4)}</table>
+    <h2>Dépistage visuel</h2><table><tr><th>Culture</th><th>Espèce</th><th>Nombre de plants dépistés</th><th>Stade(s)</th><th>Évaluation de la population</th><th>Autres observations</th></tr>${vis || empty(6)}</table>
+    <h2>Dépistage des plantes adventices</h2><table><tr><th>Culture</th><th>Espèce de l'adventice</th><th>Stade</th><th>Évaluation</th></tr>${weeds || empty(4)}</table>`}
+    ${r.note ? `<p><b>Note :</b> ${esc(r.note)}</p>` : ""}
+    <p class="foot">Échelle 0–10 : ${esc(anchors())}. Mentions entre crochets : source de l'identification lorsqu'elle n'est pas de la dépisteuse (guide, prof, piste IA). Fiche produite avec l'application Parcelle (construite avec Claude).</p>`; }
+function printRound(rid){ const one = ficheHTML(rid); $("#print").innerHTML = `<div class="copy">${one}</div><div class="copy">${one}</div>`; window.print(); }
+
+/* ---------- présentation d'un cas ---------- */
+async function showCase(did){ const d = get("diags", did); if(!d) return; const el = document.createElement("div"); el.id = "show"; const imgs = [];
+  for(const id of (d.photoIds || [])){ const p = await photoGet(id); if(p) imgs.push(`<img src="${p.data}" alt="">`); }
+  el.innerHTML = `<div class="rowline" style="max-width:1300px;margin:0 auto 12px"><h3 class="grow" style="margin:0">${esc((d.context || {}).culture || "Cas")} · ${esc(frDate(d.date))}</h3><button class="btn" data-act="closeShow">Fermer</button></div>
+    <div class="cols"><div><h2>Photos</h2>${imgs.join("") || `<p class="muted">Photos absentes de cet appareil.</p>`}</div>
+    <div><h2>Pistes proposées par l'IA${d.model ? " (" + esc(d.model) + ")" : ""}</h2>${diagResultHTML(d, did, true)}</div>
+    <div><h2>Identification finale</h2><div class="cand"><h3>${esc(d.final || "À venir")}</h3><p class="sub">${d.finalBy ? "Confirmée par : " + esc(d.finalBy) : "Pas encore confirmée sur le terrain."}</p>
+    ${d.final && d.result ? (d.result.candidats.some(c => norm(c.nom_commun) === norm(d.final) || (c.nom_latin && norm(c.nom_latin) === norm(d.final))) || norm(d.result.alternative_abiotique).includes(norm(d.final).split(" (")[0]) ? `<p><span class="tag ok">figurait parmi les pistes ou l'alternative abiotique</span></p>` : `<p><span class="tag todo">ne figurait pas dans les pistes de l'IA</span></p>`) : ""}</div></div></div>`;
+  document.body.append(el); }
+
+/* ---------- actions ---------- */
+function confirmDel(msg){ return window.confirm(msg); }
+async function ensureRound(date){ const ex = roundsG().find(([, r]) => r.date === date); if(ex) return ex[0]; const g = curGarden(); const s = settings(); const id = uid();
+  await put("rounds", id, {gardenId:S.gid, date, week:weekLabel(date), scouts:s.scouts || g.partners || "", section:g.section || "", time:date === today() ? nowHM() : "", temp:"", rh:"", prodWeek:"", note:"", status:{}, createdAt:Date.now()}); return id; }
+const curRid = () => S.view.name === "round" ? S.view.id : "";
+const ACT = {
+  back, tab:el => tab(el.dataset.v), closeSheet, closeShow:() => { const s = $("#show"); if(s) s.remove(); },
+  async saveSheet(){ if(!sheetSave) return; const r = await sheetSave(); if(r === false) return; closeSheet(); render(); },
+  garden(el){ S.gid = el.dataset.id; metaSet("gid", S.gid); render(); },
+  newGarden:() => gardenSheet(null), editGarden:() => gardenSheet(S.gid),
+  async delGarden(el){ if(!confirmDel("Supprimer ce lieu ? Ses tournées et observations restent dans la base mais ne seront plus affichées. Exportez le journal avant.")) return; await del("gardens", el.dataset.id); S.gid = defaultGid(); closeSheet(); render(); },
+  plus(){ const g = curGarden(); if(!g) return gardenSheet(null); const rid = curRid();
+    openSheet("Ajouter", `<div class="menu">${rid ? `<button data-act="newObs" data-p="">Observation (section entière)</button>` : `<button data-act="startRound">Tournée de dépistage</button>`}<button data-act="diagNew">Diagnostiquer une photo</button><button data-act="newParcel">${isSerre(g) ? "Groupe de plantes" : "Parcelle"}</button><button data-act="newTrap">Piège</button></div>`); },
+  newParcel:() => parcelSheet(null), editParcel:el => parcelSheet(el.dataset.id), newTrap:() => trapSheet(null), editTrap:el => trapSheet(el.dataset.id),
+  async delParcel(el){ if(!confirmDel("Supprimer ce groupe ? Ses observations passées restent dans les exports.")) return; await del("parcels", el.dataset.id); closeSheet(); render(); },
+  async delTrap(el){ if(!confirmDel("Supprimer ce piège ?")) return; await del("traps", el.dataset.id); closeSheet(); render(); },
+  async startRound(){ closeSheet(); if(!curGarden()) return; const id = await ensureRound(today()); go({name:"round", id}); },
+  pastRound(){ openSheet("Tournée à une autre date", fld("Date de la tournée", `<input type="date" id="f_date" value="${today()}" max="${today()}">`) + `<p class="muted">Pour saisir une fiche papier (S44, S45) ou marquer une semaine sans dépistage.</p>`, async () => { const d = val("f_date"); if(!d){ toast("Choisissez une date."); return false; } const id = await ensureRound(d); setTimeout(() => go({name:"round", id}), 0); }); },
+  openRound:el => go({name:"round", id:el.dataset.id}),
+  async delRound(){ if(!confirmDel("Supprimer cette tournée et ses observations ?")) return; const rid = curRid(); for(const [oid] of obsOfRound(rid)) await del("obs", oid); for(const [cid, c] of live("checks")) if(c.roundId === rid) await del("checks", cid); await del("rounds", rid); back(); },
+  async st(el){ const rid = curRid(); const r = get("rounds", rid); const pid = el.dataset.p; if(obsOfRound(rid, pid).length){ toast("Ce groupe a des observations : supprimez-les d'abord pour changer son statut."); return; }
+    const status = {...(r.status || {})}; if(el.dataset.v) status[pid] = "none"; else delete status[pid]; await put("rounds", rid, {...r, status}); render(); },
+  newObs(el){ closeSheet(); obsSheet(curRid(), el.dataset.p || "", null, el.dataset.cat ? {cat:el.dataset.cat} : null); },
+  editObs(el){ const o = get("obs", el.dataset.id); obsSheet(o.roundId, o.parcelId || "", el.dataset.id); },
+  async delObs(el){ if(!confirmDel("Supprimer cette observation ?")) return; await del("obs", el.dataset.id); closeSheet(); render(); },
+  oCat(el){ sheetDraft.cat = el.dataset.v; $$("#catChips button").forEach(b => b.classList.toggle("on", b === el)); const dl = $("#orgList"); if(dl) dl.innerHTML = allOrganismNames(sheetDraft.cat).map(x => `<option value="${esc(x)}">`).join(""); },
+  oRate(el){ sheetDraft.rating = String(sheetDraft.rating) === el.dataset.v ? "" : el.dataset.v; $$("#o_rate button").forEach(b => b.classList.toggle("on", b.dataset.v === String(sheetDraft.rating))); },
+  async oPhoto(el){ const ids = await pickPhotos(!!el.dataset.cam); sheetDraft.photoIds.push(...ids); const box = $("#o_photos"); if(box){ box.innerHTML = thumbsHTML(sheetDraft.photoIds, "oRmPhoto"); hydrateThumbs(box); } },
+  oRmPhoto(el){ sheetDraft.photoIds = sheetDraft.photoIds.filter(x => x !== el.dataset.id); const box = $("#o_photos"); box.innerHTML = thumbsHTML(sheetDraft.photoIds, "oRmPhoto"); hydrateThumbs(box); },
+  stepUp(el){ const i = document.getElementById(el.dataset.for); i.value = (Number(i.value) || 0) + 1; }, stepDn(el){ const i = document.getElementById(el.dataset.for); i.value = Math.max(0, (Number(i.value) || 0) - 1); },
+  async ckNone(el){ const rid = curRid(); const r = get("rounds", rid); const tid = el.dataset.t; const ck = checkOf(rid, tid);
+    if(el.dataset.v){ if(ck && (ck[1].counts || []).length){ toast("Ce piège a des captures : supprimez-les d'abord."); return; } if(!ck) await put("checks", uid(), {trapId:tid, roundId:rid, gardenId:r.gardenId, date:r.date, counts:[], createdAt:Date.now()}); }
+    else if(ck){ if((ck[1].counts || []).length && !confirmDel("Effacer le relevé de ce piège pour cette tournée ?")) return; await del("checks", ck[0]); }
+    render(); },
+  newCap:el => capSheet(curRid(), el.dataset.t), editCap:el => capSheet(curRid(), el.dataset.t, Number(el.dataset.i)),
+  async delCap(el){ const ck = checkOf(curRid(), el.dataset.t); const counts = [...ck[1].counts]; counts.splice(Number(el.dataset.i), 1); await put("checks", ck[0], {...ck[1], counts}); closeSheet(); render(); },
+  printRound:() => printRound(curRid()),
+  async finishRound(){ const rid = curRid(); const r = get("rounds", rid); const ps = parcelsG(); const left = r.noScout ? 0 : ps.filter(([pid]) => !statusOf(r, rid, pid)).length;
+    await put("rounds", rid, {...r, doneAt:Date.now()});
+    openSheet("Tournée terminée", `${left ? `<div class="banner">${left} groupe(s) restent « non dépisté » : ils seront exportés vides, jamais comme 0.</div>` : ""}<p>Sauvegardez le journal maintenant, dans Fichiers ou Drive. C'est la seule copie hors de cet appareil.</p><div class="menu"><button data-act="exportJournal">Sauvegarder le journal</button><button data-act="closeSheet">Plus tard</button></div><p class="muted" id="ioMsg"></p>`); },
+  zoomSrc(el){ const d = document.createElement("div"); d.id = "lightbox"; d.innerHTML = `<img src="${esc(el.dataset.src)}" alt="">`; d.onclick = () => d.remove(); document.body.append(d); },
+  openCredits:() => go({name:"credits"}),
+  async dlPhotos(){ const all = Object.values(S.credits || {}).flat(); let ok = 0;
+    for(const [i, p] of all.entries()){ const m = $("#dlMsg"); if(m) m.textContent = "Téléchargement " + (i + 1) + "/" + all.length + "…"; try{ const r = await fetch(p.file); if(r.ok){ await r.blob(); ok++; } }catch(e){} }
+    if($("#dlMsg")) $("#dlMsg").textContent = ok === all.length ? "Les " + ok + " photos sont disponibles hors ligne." : ok + "/" + all.length + " photos téléchargées. Réessayez avec une meilleure connexion."; },
+  reloadApp:() => location.reload(),
+  zoom:el => zoom(el.dataset.id),
+  async copy(el){ try{ await navigator.clipboard.writeText(el.dataset.t); toast("Copié : " + el.dataset.t); }catch(e){ toast("Copie impossible sur cet appareil."); } },
+  guideMode(el){ S.view = {name:"guide", mode:el.dataset.v}; render(); },
+  kPart(el){ S.view = {...S.view, part:S.view.part === el.dataset.v ? "" : el.dataset.v}; render(); }, kVu(el){ S.view = {...S.view, vu:S.view.vu === el.dataset.v ? "" : el.dataset.v}; render(); },
+  openEntry(el){ const s = $("#show"); if(s) s.remove(); go({name:"entry", id:el.dataset.id}); },
+  goKey(){ go({name:"guide", mode:"cle", part:(get("diags", S.view.id).context || {}).part || ""}); },
+  casMode(el){ S.view = {name:"cas", starred:!!el.dataset.v}; render(); }, openDiag:el => go({name:"diag", id:el.dataset.id}), showCase:el => showCase(el.dataset.id),
+  async diagNew(el){ closeSheet(); const rid = curRid(); const r = rid ? get("rounds", rid) : null; const pid = el.dataset.p || ""; const p = get("parcels", pid); const g = curGarden(); const id = uid();
+    await put("diags", id, {date:today(), gardenId:S.gid || "", roundId:rid, parcelId:pid, photoIds:[], context:{culture:p ? parcelName(p) : "", latin:p ? p.latin || "" : "", lieu:g ? (isSerre(g) ? "serre" : "jardin") + " — " + g.name : "", temp:r ? r.temp ?? "" : "", rh:r ? r.rh ?? "" : ""}, status:"pending", createdAt:Date.now()}); go({name:"diag", id}); },
+  async diagPhoto(el){ const d = get("diags", S.view.id); const ids = await pickPhotos(!!el.dataset.cam, 4 - (d.photoIds || []).length); if(ids.length){ await put("diags", S.view.id, {...get("diags", S.view.id), photoIds:[...(d.photoIds || []), ...ids].slice(0, 4)}); render(); } },
+  async diagRmPhoto(el){ const d = get("diags", S.view.id); await put("diags", S.view.id, {...d, photoIds:(d.photoIds || []).filter(x => x !== el.dataset.id)}); render(); },
+  async diagCopy(){ const d = get("diags", S.view.id); const p = diagPrompt(d); await put("diags", S.view.id, {...d, prompt:p}); try{ await navigator.clipboard.writeText(p); toast("Demande copiée. Collez-la dans Claude avec les photos."); }catch(e){ openSheet("Demande à copier", `<textarea style="width:100%;min-height:50dvh;font-size:14px" readonly>${esc(p)}</textarea>`); } },
+  async diagShare(){ const d = get("diags", S.view.id); const p = diagPrompt(d); await put("diags", S.view.id, {...d, prompt:p}); const files = [];
+    for(const [i, id] of (d.photoIds || []).entries()){ const ph = await photoGet(id); if(ph) files.push(dataURLtoFile(ph.data, "parcelle_" + d.date.replace(/-/g, "") + "_" + pad(i + 1) + ".jpg")); }
+    try{ await navigator.clipboard.writeText(p); }catch(e){}
+    if(navigator.canShare && files.length && navigator.canShare({files})){ try{ await navigator.share({files, text:p}); toast("Une fois la réponse reçue, copiez-la et revenez ici (étape 4)."); }catch(e){ if(e.name !== "AbortError") toast("Partage refusé : " + e.message); } }
+    else toast("Le partage de fichiers n'est pas offert ici. La demande est copiée : joignez les photos à la main dans Claude.", 6000); },
+  async diagPaste(){ try{ const t = await navigator.clipboard.readText(); $("#diagRaw").value = t; }catch(e){ toast("Collez à la main dans la zone de texte (appui long → Coller)."); } },
+  async diagValidate(){ const d = get("diags", S.view.id); const raw = $("#diagRaw").value; const model = $("#diagModel").value.trim(); const res = parseDiag(raw);
+    if(!res.ok){ await put("diags", S.view.id, {...d, raw, model, errors:res.errors}); render(); return; }
+    await put("diags", S.view.id, {...d, raw, model, errors:[], warnings:res.warnings, result:res.data, answeredAt:Date.now(), prompt:d.prompt || diagPrompt(d)}); await metaSet("diagCount", (S.meta.diagCount || 0) + 1); render(); window.scrollTo(0, 0); },
+  async diagRedo(){ const d = get("diags", S.view.id); if(!confirmDel("Remplacer la réponse actuelle ? Le texte brut reste dans la zone de collage.")) return; const {result, ...rest} = d; await put("diags", S.view.id, {...rest, status:"pending", acceptedIdx:null}); render(); },
+  async diagAccept(el){ const d = get("diags", el.dataset.id); const i = Number(el.dataset.i); const c = d.result.candidats[i]; let rid = d.roundId && get("rounds", d.roundId) ? d.roundId : "";
+    const oid = uid(); const r = rid ? get("rounds", rid) : null;
+    await put("obs", oid, {gardenId:(r && r.gardenId) || d.gardenId || S.gid, roundId:rid, parcelId:d.parcelId || "", date:r ? r.date : d.date, createdAt:Date.now(), photoIds:[...(d.photoIds || [])],
+      rows:[{cat:TYPE_CAT[c.type] || "unk", species:c.nom_commun || c.nom_latin, latin:c.nom_latin, uncertain:true, confirm:"piste IA", iaInitial:(c.nom_commun || c.nom_latin) + (c.nom_latin && c.nom_commun ? " (" + c.nom_latin + ")" : "") + " — confiance " + (c.confiance || "?"), part:(d.context || {}).part || "", method:"", note:"", diagId:el.dataset.id}]});
+    await put("diags", el.dataset.id, {...d, status:"accepted", acceptedIdx:i, obsId:oid}); toast("Ajouté comme « piste IA », à confirmer sur place."); render(); },
+  async diagReject(el){ const d = get("diags", el.dataset.id); await put("diags", el.dataset.id, {...d, status:"rejected"}); render(); },
+  async diagDel(){ if(!confirmDel("Supprimer ce diagnostic ? L'observation liée, s'il y en a une, est conservée.")) return; await del("diags", S.view.id); back(); },
+  exportJournal, importJournal,
+  async csvObs(){ await saveFile("parcelle-observations-" + today() + ".csv", buildObsCSV(), "text/csv"); }, async csvTraps(){ await saveFile("parcelle-pieges-" + today() + ".csv", buildTrapCSV(), "text/csv"); },
+  dropOld(){ if(!confirmDel("Supprimer définitivement la copie de secours de la version 1 sur cet appareil ?")) return; try{ localStorage.removeItem("gp_data_v1"); }catch(e){} render(); }
+};
+document.addEventListener("click", e => { const el = e.target.closest("[data-act]"); if(!el || el.disabled) return; const fn = ACT[el.dataset.act]; if(fn){ if(el.tagName !== "A") e.preventDefault(); fn(el); } });
+document.addEventListener("change", async e => { const el = e.target; const v = el.type === "checkbox" ? el.checked : el.value.trim();
+  if(el.dataset.rf){ const rid = curRid(); const r = {...get("rounds", rid)}; const k = el.dataset.rf;
+    if(k === "date"){ if(!v){ el.value = r.date; return; } if(roundsG().some(([id, x]) => id !== rid && x.date === v)){ toast("Une tournée existe déjà à cette date."); el.value = r.date; return; }
+      r.date = v; r.week = weekLabel(v); await put("rounds", rid, r); for(const [oid, o] of obsOfRound(rid)) await put("obs", oid, {...o, date:v}); for(const [cid, c] of live("checks")) if(c.roundId === rid) await put("checks", cid, {...c, date:v}); render(); return; }
+    r[k] = (k === "temp" || k === "rh") ? (v === "" ? "" : (isNaN(Number(String(v).replace(",", "."))) ? v : Number(String(v).replace(",", ".")))) : v; await put("rounds", rid, r); if(k === "noScout") render(); }
+  else if(el.dataset.ck){ const ck = checkOf(curRid(), el.dataset.ck); if(ck) await put("checks", ck[0], {...ck[1], replaced:v}); render(); }
+  else if(el.dataset.df){ const d = get("diags", S.view.id); await put("diags", S.view.id, {...d, context:{...(d.context || {}), [el.dataset.df]:v}}); }
+  else if(el.dataset.dx){ const d = get("diags", S.view.id); await put("diags", S.view.id, {...d, [el.dataset.dx]:v}); if(el.dataset.dx === "starred") toast(v ? "Ajouté aux cas présentés." : "Retiré des cas présentés."); }
+  else if(el.dataset.nf){ await put("notes", el.dataset.nf, {text:el.value}); }
+  else if(el.dataset.sf){ await put("settings", "main", {...settings(), [el.dataset.sf]:v}); }
+});
+document.addEventListener("input", e => { if(e.target.id === "gq"){ S.view.q = e.target.value; const pos = e.target.selectionStart; render(); const q = $("#gq"); if(q){ q.focus(); try{ q.setSelectionRange(pos, pos); }catch(e){} } } });
+window.addEventListener("afterprint", () => { $("#print").innerHTML = ""; });
+
+/* ---------- démarrage ---------- */
+(async function init(){
+  try{ await loadAll(); }catch(e){ $("#main").innerHTML = `<div class="banner alert"><b>Impossible d'ouvrir le stockage de l'appareil.</b> ${esc(e && e.message || e)}. En navigation privée, Safari bloque parfois IndexedDB : ouvrez l'application depuis l'écran d'accueil ou un onglet normal. Rien n'a été modifié.</div>`; return; }
+  try{ await migrateV1(); }catch(e){ console.error(e); }
+  try{ const r = await fetch("data/guide.json"); if(r.ok) S.guide = await r.json(); }catch(e){}
+  try{ const r = await fetch("photos/credits.json"); if(r.ok) S.credits = await r.json(); }catch(e){}
+  S.gid = (S.meta.gid && get("gardens", S.meta.gid)) ? S.meta.gid : defaultGid();
+  saveState(true); render();
+  try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
+  if("serviceWorker" in navigator && location.protocol.startsWith("http")){ try{ const had = !!navigator.serviceWorker.controller; const reg = await navigator.serviceWorker.register("sw.js");
+      reg.addEventListener("updatefound", () => { const w = reg.installing; if(!w) return; w.addEventListener("statechange", () => { if(w.state === "activated" && had){ const b = document.createElement("div"); b.className = "banner"; b.innerHTML = `Nouvelle version de Parcelle installée. <button class="btn ghost" data-act="reloadApp">Recharger</button>`; $("#main").prepend(b); } }); }); }catch(e){} }
+})();
+</script>
+</body>
+</html>
